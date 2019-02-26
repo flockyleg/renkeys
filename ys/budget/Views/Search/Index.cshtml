@@ -1,0 +1,83 @@
+﻿@{
+    ViewBag.Title = "申办查询";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+
+    <style>
+        p.searchtitle {
+            font-size: 16px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: black;
+            text-decoration: none;
+            text-align:center;
+        }
+
+        #searchhead {
+            color: #FF7F00;
+            text-wrap: none;
+        }
+    </style>
+
+</head>
+
+<body style="background-color: #2A293B;">
+    <table style="width: 100%; background-color: dimgrey; min-height: 400px;">
+        <tr>
+            <td style="height:100%;vertical-align:central;">
+                <div class="divbackground">
+                    <div class="container">
+                        <br>
+                        <ul class="list-group wow fadeinup" data-wow-duration="1000ms" data-wow-delay="300ms">
+                            <li class="list-group-item" style="background-color:#eaebed;">
+                                <p class="searchtitle">申 办 签 证 查 询</p>
+                            </li>
+
+                            <li class="list-group-item">
+                                <br>
+                                <div class="input-group wow fadeInUp" data-wow-duration="1000ms" data-wow-delay="300ms">
+                                    <span class="input-group-addon">受理单号</span>
+                                    <input type="text" class="form-control" aria-label="..." value="" placeholder="申办时获取的受理单号">
+                                </div>
+                                <div class="input-group wow fadeInUp" data-wow-duration="1000ms" data-wow-delay="300ms">
+                                    <span class="input-group-addon">短信手机</span>
+                                    <input type="text" class="form-control" aria-label="..." value="" placeholder="申办时填写的短信接收手机号">
+                                </div>
+                                <div class="input-group wow fadeInUp" data-wow-duration="1000ms" data-wow-delay="300ms">
+                                    <span class="input-group-addon">验 证 码</span>
+                                    <input type="text" class="form-control" aria-label="..." value="" placeholder="短信手机获取到的验证码">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" type="button" onclick="">获取</button>
+                                    </span>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <table style="width:100%;height:60px;">
+                                    <tr style="width:100%">
+                                        <td style="width: 100px; text-align: center; "><button class="btn btn-primary" type="button" onclick="returnhome();">&nbsp;&nbsp;&nbsp;返回首页&nbsp;&nbsp;&nbsp;</button></td>
+                                        <td style="text-align: center; "></td>
+                                        <td style="width: 100px; text-align: center; "><button class="btn btn-primary" type="button" onclick="cxjg();"><span id="searchhead">▋</span>&nbsp;&nbsp;确定查询&nbsp;&nbsp;</button></td>
+                                    </tr>
+                                </table>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+
+<script type="text/javascript" language="javascript">
+    function returnhome() {
+        window.location = "../Home/Index";
+    }
+
+    function cxjg() {
+        window.location = "Apprec";
+    }
+</script>

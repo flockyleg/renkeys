@@ -1,0 +1,98 @@
+﻿@{
+    ViewBag.Title = "首页";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script type="text/javascript" language="javascript">
+        var windowWidth = $(window).width();
+        if (parseInt(windowWidth) < 1000) {
+            document.getElementById('mainmenu').style.display = 'none';
+            document.getElementById('maincaption').style.height = '86px';
+        }
+    </script>
+
+    <style>
+        @{
+            string s1 = "";
+            bool b1 = false;
+            b1 = Request.Browser.IsMobileDevice;
+
+            //如果是移动设备
+            if(b1 && (Request.Browser.ScreenPixelsWidth < 1000)) {
+                s1 = "";
+            }
+            else {
+                s1 = "";   // s1 = "../Images/backimg.jpg";
+            }
+        }
+
+            .divbackground {
+                background-color: #ffffff;
+                width: 100%;
+                height: 100%;
+                background-size: 100% 100%;
+                position: relative;
+                min-height: 500px;
+                text-align: center;
+            }
+
+                .divbackground span {
+                    height: 100%;
+                    display: inline-block;
+                    vertical-align: middle;
+                }
+
+            div.divin {
+                display: inline-block;
+                vertical-align: middle;
+                text-align: center;
+            }
+
+            p.divin {
+                font-size: 16px;
+                font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+                color: white;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+                p.divin:hover {
+                    font-size: 16px;
+                    font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+                    color: gray;
+                    text-decoration: none;
+                }
+
+
+            img.lan {
+                width: 120px;
+                height: 120px;
+            }
+    </style>
+</head>
+
+<body>
+
+    <!-- 内容 -->
+
+    <!-- //内容 -->
+
+</body>
+</html>
+
+<script type="text/javascript" language="javascript">
+    document.getElementById("worktable").style.height = document.body.clientHeight + "px";
+
+    var windowWidth = $(window).width();
+    //if (parseInt(windowWidth) < 1000) {
+    if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+        document.getElementById('gl1').style.width = '20px';
+        document.getElementById('gl2').style.width = '20px';
+    }
+
+</script>

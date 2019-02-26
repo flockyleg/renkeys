@@ -1,0 +1,722 @@
+﻿@using applyvisa.Models;
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "用户维护";
+
+    var bms = ViewBag.bms as List<cls部门>;
+
+    int percount = 20;   //每页20行
+    int pagenum = 0;     //当前页码
+    int pagetotal = 0;   //总页数
+
+    string s1 = "";
+    string s2 = "";
+    string s3 = "";
+    string s4 = "";
+    List<cls用户> lstsb = null;
+
+    try { pagenum = (int)ViewBag.pagenum; }
+    catch { }
+    try { pagetotal = (int)ViewBag.pagetotal; }
+    catch { }
+
+    try { s1 = (string)TempData["sbcx_t1"]; }
+    catch { }
+    try { s2 = (string)TempData["sbcx_t2"]; }
+    catch { }
+    try { s3 = (string)TempData["sbcx_t3"]; }
+    catch { }
+    try { s4 = (string)TempData["sbcx_t4"]; }
+    catch { }
+
+    try { lstsb = (List<cls用户>)ViewBag.pagedata; }
+    catch { }
+    if (lstsb == null)
+    {
+        lstsb = new List<cls用户>();
+    }
+    int i = 0;
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+
+    <script type="text/javascript" src="~/Others/js/alert.js"></script>
+
+    <style>
+        #countrycolor {
+            color: #FF7F00;
+            text-wrap: none;
+        }
+
+        p.xingming {
+            font-size: 15px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: white;
+            background-color: #280581;
+            height: 35px;
+            vertical-align: middle;
+            display: block;
+            line-height: 35px;
+            text-align: left;
+        }
+
+        p.xiangqing {
+            font-size: 13px;
+            /*font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;*/
+            color: black;
+            background-color: #a3abcf;
+            height: 100%;
+        }
+
+        .parent {
+            width: 100%;
+            height: 230px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .children {
+            display: inline-block;
+            width: 150px;
+            height: 150px;
+        }
+
+        .button {
+            font-size: 16px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: expanded;
+            color: #333333;
+        }
+
+        * + html .children {
+            display: inline;
+            zoom: 1;
+        }
+
+        * html .children {
+            display: inline;
+            zoom: 1;
+        }
+    </style>
+
+    <style type="text/css">
+        .pop-box {
+            /*弹出窗口后，弹出的DIV采用此CSS，保证置于最上层
+          z-index控制Z轴的坐标，数值越大，离用户越近
+        */
+            z-index: 9999999; /*这个数值要足够大，才能够显示在最上层*/
+            margin-bottom: 3px;
+            display: none;
+            position: absolute;
+        }
+
+        #bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            /*弹出窗口后，添加遮罩层，采用此CSS，将该层置于弹出DIV和页面层之间
+          z-index控制Z轴的坐标，数值越大，离用户越近  rgba(72, 74, 68, 0.46)
+        */
+            z-index: 1001;
+            background-color: #cfcdcd;
+            -moz-opacity: 0.7;
+            opacity: .70;
+            filter: alpha(opacity = 70);
+        }
+
+        td.style1 {
+            background-color: lightblue;
+            text-align: center;
+            color: gray;
+        }
+    </style>
+    <script type="text/javascript">
+        /*显示DIV*/
+        function popupDiv(div_id, id, xh, dlm, xm, mm, qx, bz, bm, js) {
+            
+            var a = document.getElementById('txtyhid')
+            a.value = id;
+            var b = document.getElementById('txtqx')
+            b.value = qx;
+            
+            var v1 = document.getElementById('txtxh')  //$('txtxh').val(xh);
+            v1.value = xh;
+            var v2 = document.getElementById('txtdlm')  //$('txtdlm').val(dlm);
+            v2.value = dlm;
+            var v3 = document.getElementById('txtxm')  //$('txtxm').val(xm);
+            v3.value = xm;
+            var v4 = document.getElementById('txtmm')  //$('txtmm').val(mm);
+            v4.value = mm;
+            var v5 = document.getElementById('txtbz')  //$('txtbz').val(bz);
+            v5.value = bz;
+            var v6 = document.getElementById('txtbm')
+            v6.value = bm;
+            var v7 = document.getElementById('txtjs')
+            v7.value = js;
+
+            // 获取传入的DIV
+            var $div_obj = $("#" + div_id);
+            // 计算机屏幕高度
+            var windowWidth = $(window).width();
+            // 计算机屏幕长度
+            var windowHeight = $(window).height();
+            // 取得传入DIV的高度
+            var popupHeight = $div_obj.height();
+            // 取得传入DIV的长度
+            var popupWidth = $div_obj.width();
+
+            var documentWidth = $(document).width();
+            var documentHeight = $(document).height();
+
+            $("<div id='bg'></div>").width(documentWidth * 0.99)
+                    .height(documentHeight * 0.99).click(function () {
+                        //hideDiv(div_id);
+                    }).appendTo("body").fadeIn(200);
+
+            var left1 = windowWidth / 2 - popupWidth / 2;
+            var top1 = windowHeight / 2 - popupHeight / 2;
+            if (left1 < 0) left1 = 0;
+            if (top1 < 0) top1 = 0;
+            if (left1 < $(document).scrollLeft()) left1 = $(document).scrollLeft();
+            if (top1 < $(document).scrollTop()) top1 = $(document).scrollTop();
+            top1 = $(document).scrollTop() - 30;   //直接靠上对齐
+            $div_obj.css({
+                "position": "absloute"
+            }).animate({
+                left: left1,
+                top: top1,
+                opacity: "show"
+            }, "slow");
+
+            //var chkObjs = "";
+            //var obj = document.getElementsByName("chkqx")
+            //for (var i = 0; i < obj.length; i++) {
+            //    if (b.value.search(obj[i].value) > -1) {  //indexof不行
+            //        obj[i].checked = true;
+            //    }
+            //}
+            var xxs = new Array();
+            xxs = qx.split(" ");
+            var obj = document.getElementsByName("chkqx")
+            for (var j = 0; j < xxs.length ; j++) {
+                for (var i = 0; i < obj.length; i++) {
+                    if (xxs[j] == obj[i].value) {
+                        obj[i].checked = true;
+                    }
+                }
+            }
+        }
+
+        /*隐藏DIV*/
+        function hideDiv(div_id) {
+            $("#bg").remove();
+            $("#" + div_id).animate({
+                left: 0,
+                top: 0,
+                opacity: "hide"
+            }, "slow");
+        }
+
+    </script>
+
+</head>
+
+<body style="background-color: #2A293B;">
+
+
+    <div id="popSQR" class="pop-box">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <input id="txtyhid" type="hidden">
+                <input id="txtqx" type="hidden">
+
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popSQR');">×</button>
+                    <h4 id="myModalLabel" class="modal-title">系统用户</h4>
+                </div>
+                <div class="panel-body" style="height: 100%;">
+                    <div class="parent" style="text-align: left; height: auto;">
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">排序号</span>
+                            <input id="txtxh" type="text" class="form-control" placeholder="输入排序号（数字）">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">登录名</span>
+                            <input id="txtdlm" type="text" class="form-control" placeholder="输入登录名">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">姓　名</span>
+                            <input id="txtxm" type="text" class="form-control" placeholder="输入姓名">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">密　码</span>
+                            <input id="txtmm" type="text" class="form-control">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">部　门</span>
+                            <input id="txtbm" type="text" class="form-control" placeholder="输入所属部门" aria-describedby="basic-addon1">
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                    <li><a onclick="comboitemclick('txtbm', '');"></a></li>
+                                    @{
+                                        for (i = 0; i < bms.Count;i++ )
+                                        {
+                                            <li><a onclick="comboitemclick('txtbm', '@bms[i].名称');">@bms[i].名称</a></li>
+                                        }
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">角　色</span>
+                            <input id="txtjs" type="text" class="form-control" aria-describedby="basic-addon1">
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                    <li><a onclick="comboitemclick('txtjs', '');"></a></li>
+                                    <li><a onclick="comboitemclick('txtjs', '超级用户');">超级用户</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">备　注</span>
+                            <input id="txtbz" type="text" class="form-control">
+                        </div>
+                        <div style="font-size:15px;" id="txtquanxian">
+                            &nbsp;&nbsp;权限：
+                            <table style="width:95%">
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="固定预算申请">固定预算申请
+                                    </td>
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="固定预算查询">固定预算查询
+                                    </td>
+                                    <td style="width: 34%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="固定预算变更申请">固定预算变更申请
+                                    </td>
+                                </tr>
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="固定预算变更查询">固定预算变更查询
+                                    </td>
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;
+                                    </td>
+                                    <td style="width: 34%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;
+                                    </td>
+                                </tr>
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="项目预算申请">项目预算申请
+                                    </td>
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="项目预算查询">项目预算查询
+                                    </td>
+                                    <td style="width: 34%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="项目预算变更申请">项目预算变更申请
+                                    </td>
+                                </tr>
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="项目预算变更查询">项目预算变更查询
+                                    </td>
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;
+                                    </td>
+                                    <td style="width: 34%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;
+                                    </td>
+                                </tr>
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="中证通订单实际收支">中证通订单实际收支
+                                    </td>
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="中证通订单查询">中证通订单查询
+                                    </td>
+                                    <td style="width: 34%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;
+                                    </td>
+                                </tr>
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="激励申请">激励申请
+                                    </td>
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="激励查询">激励查询
+                                    </td>
+                                    <td style="width: 34%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;
+                                    </td>
+                                </tr>
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="待审批预算">待审批预算
+                                    </td>
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="待核定预算">待核定预算
+                                    </td>
+                                    <td style="width: 34%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="待审批变更">待审批变更
+                                    </td>
+                                </tr>
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="待审批激励">待审批激励
+                                    </td>
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;
+                                    </td>
+                                    <td style="width: 34%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;
+                                    </td>
+                                </tr>
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="实际收支输入">实际收支输入
+                                    </td>
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="系统转账">系统转账
+                                    </td>
+                                    <td style="width: 34%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="手动转账">手动转账
+                                    </td>
+                                </tr>
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="预算查询(全)">预算查询(全)
+                                    </td>
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="预算查询统计">预算查询统计
+                                    </td>
+                                    <td style="width: 34%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="预算变更查询(全)">预算变更查询(全)
+                                    </td>
+                                </tr>
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="激励查询(全)">激励查询(全)
+                                    </td>
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="预算盈亏表">预算盈亏表
+                                    </td>
+                                    <td style="width: 34%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="实际盈亏表">实际盈亏表
+                                    </td>
+                                </tr>
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="应收应付表">应收应付表
+                                    </td>
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="业绩跟踪表">业绩跟踪表
+                                    </td>
+                                    <td style="width: 34%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="中证通订单应收表">中证通订单应收表
+                                    </td>
+                                </tr>
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="消息管理">消息管理
+                                    </td>
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="基本参数">基本参数
+                                    </td>
+                                    <td style="width: 34%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="公司部门">公司部门
+                                    </td>
+                                </tr>
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="成本中心">成本中心
+                                    </td>
+                                    <td style="width: 33%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="用户管理">用户管理
+                                    </td>
+                                    <td style="width: 34%; height: 30px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkqx" type="checkbox" value="修改密码">修改密码
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input id="lblMsg1" type="text" readonly="readonly" style="border-style:none;color:red;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popSQR');">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="configDiv_Yd('popSQR');">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <table id="worktable" style="width: 1024px; background-color: white; min-height: 400px; margin-right: auto; margin-left: auto;">
+        <tr>
+            <td style="height:100%;vertical-align:top;">
+                <div class="divbackground">
+                    <li class="list-group-item">
+                        <table style="width:100%;height:60px;">
+                            <tr style="width:100%">
+                                <td colspan="3" style="text-align:center;font-size:18px;">系 统 用 户</td>
+                            </tr>
+                            <tr style="width:100%">
+                                <td style="text-align: right; "></td>
+                                <td style="width: 180px; text-align: center; "></td>
+                                <td style="text-align: right; ">
+                                    <button id="butXz" class="btn btn-primary" type="button" style="width:100px;" onclick="popupDiv('popSQR', '', '', '', '', '', '', '', '', '');">新　增</button>
+                                    &nbsp;&nbsp;<button id="butSx" class="btn btn-primary" type="button" style="width:100px;" onclick="rollto(0);">刷　新</button>
+                                    &nbsp;&nbsp;<button id="butSx" class="btn btn-primary" type="button" style="width:100px;" onclick="previousstep();">关　闭</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </li>
+
+                    <li class="list-group-item">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>排序号</th>
+                                    <th>登录名</th>
+                                    <th>姓名</th>
+                                    <th>部门</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @{
+
+                                    for (i = 0; i < lstsb.Count; i++)
+                                    {
+                                        int xh = (pagenum - 1) * percount + i + 1;
+                                        <tr>
+                                            <td>@lstsb[i].序号</td>
+                                            <td>@lstsb[i].登录名</td>
+                                            <td>@lstsb[i].姓名</td>
+                                            <td>@lstsb[i].部门</td>
+                                            <td><a href="javascript:popupDiv('popSQR','@lstsb[i].ID','@lstsb[i].序号','@lstsb[i].登录名','@lstsb[i].姓名','@lstsb[i].密码','@lstsb[i].权限','@lstsb[i].备注','@lstsb[i].部门','@lstsb[i].角色');">修改</a> | <a href="javascript:shanchu('@lstsb[i].ID');">删除</a></td>
+                                        </tr>
+                                    }
+
+                                }
+
+                            </tbody>
+                        </table>
+
+                        <br>
+                        <input id="dqy" type="hidden" value="@pagenum"><input id="zys" type="hidden" value="@pagetotal">
+
+                        <table style="width:100%;height:60px;">
+                            <tr style="width:100%">
+                                <td></td>
+                                <td style="text-align: center; width:360px;">
+
+                                    <div class="input-group">
+                                        <span class="input-group-addon">共 @pagetotal 页 / 第</span>
+                                        <input id="txtdangqianye" type="text" class="form-control" style="text-align:center;" value="@pagenum">
+                                        <span class="input-group-addon">页</span>
+                                        <span class="input-group-btn">
+                                            <button id="butsyy" class="btn btn-default" type="button" onclick="rollto(-1);">﹤</button>
+                                        </span>
+                                        <span class="input-group-btn">
+                                            <button id="butxyy" class="btn btn-default" type="button" onclick="rollto(1);">﹥</button>
+                                        </span>
+                                        <span class="input-group-btn">
+                                            <button id="butxy" class="btn btn-default" type="button" onclick="rollto(0);">Go</button>
+                                        </span>
+                                    </div>
+
+
+                                </td>
+                                <td></td>
+                            </tr>
+                        </table>
+
+                    </li>
+
+
+
+                </div>
+            </td>
+        </tr>
+    </table>
+
+
+
+</body>
+</html>
+
+
+<script type="text/javascript" src="~/Others/js/confirm.js"></script>
+<script type="text/javascript" language="javascript">
+
+    function previousstep() {
+        window.location = "Index";
+    }
+
+    function rollto(intstep) {
+        var a1 = "1";
+        var a2 = "1";
+        var a = "1";
+        a1 = $("#dqy").val();
+        a2 = $("#zys").val();
+        a = $("#txtdangqianye").val();
+        if (a1 == "" || undefined || null) {
+            a1 = '1';
+        }
+        if (a2 == "" || undefined || null) {
+            a2 = '1';
+        }
+        if (a == "" || undefined || null) {
+            a = '1';
+        }
+        a = parseInt(a) + parseInt(intstep);
+        //if (parseInt(a1) > parseInt(a2)) {
+        //    a1 = a2;
+        //}
+        //if (parseInt(a) < parseInt(a1)) {
+        //    a = a1;
+        //}
+        //if (parseInt(a) > parseInt(a2)) {
+        //    a = a2;
+        //}
+
+
+        $("#txtdangqianye").val(a);
+
+        var s = "../Home/Yonghulist?p=" + a;
+        window.location = s;
+    }
+
+    function comboitemclick(txtid, txtvalue) {
+        var a = document.getElementById(txtid)
+        a.value = txtvalue;
+    }
+
+    function shanchu(id) {
+        var b1 = confirm("确认要删除该用户？");
+        if (b1) {
+            $.ajax({
+                type: 'POST',
+                url: "/Home/Yonghushanchu",
+                data: {
+                    id: id
+                },
+                dataType: "json",
+                success: function (sesponseTest) {
+                    switch (sesponseTest) {
+                        case 900001:
+                            alert("系统错误，请稍后重试。");
+                            break;
+                        case 900003:
+                            alert("删除失败。");
+                            break;
+                        default:
+                            alert("删除成功，点刷新按钮刷新列表。");
+                            break;
+                    }
+                }
+            });
+        }
+    }
+
+
+    function configDiv_Yd(div_id) {
+        var id = $("#txtyhid").val();
+        if (id == "" || undefined || null) {
+            id = "";
+        }
+        var xh = $("#txtxh").val();
+        if (xh == "" || undefined || null) {
+            $("#lblMsg1").val('请输入排序号。');
+            return false;
+        }
+        var dlm = $("#txtdlm").val();
+        if (dlm == "" || undefined || null) {
+            $("#lblMsg1").val('请输入登录名。');
+            return false;
+        }
+        var xm = $("#txtxm").val();
+        if (xm == "" || undefined || null) {
+            $("#lblMsg1").val('请输入姓名。');
+            return false;
+        }
+        var mm = $("#txtmm").val();
+        if (mm == "" || undefined || null) {
+            mm = "";
+        }
+        var bm = $("#txtbm").val();
+        if (bm == "" || undefined || null) {
+            bm = "";
+        }
+        var js = $("#txtjs").val();
+        if (js == "" || undefined || null) {
+            js = "";
+        }
+        var chkObjs = "";
+        var obj = document.getElementsByName("chkqx")
+        for (var i = 0; i < obj.length; i++) { //遍历Radio 
+            if (obj[i].checked) {
+                chkObjs = chkObjs + " " + obj[i].value;
+            }
+        }
+        //alert(chkObjs);
+        var bz = $("#txtbz").val();
+        if (bz == "" || undefined || null) {
+            bz = "";
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: "/Home/SaveYonghu",
+            data: {
+                id: id,
+                xh: xh,
+                dlm: dlm,
+                xm: xm,
+                mm: mm,
+                qx: chkObjs,
+                bz: bz,
+                bm: bm,
+                js: js
+            },
+            dataType: "text",
+            success: function (sesponseTest) {
+                switch (sesponseTest) {
+                    case 401:
+                        alert('保存失败，未知的用户。');
+                        break;
+                    case 402:
+                        alert('保存失败，登录名或姓名未输入。');
+                        break;
+                    default:
+                        hideDiv(div_id);
+                        alert('保存成功，点击刷新按钮获取更新列表。');
+                        break;
+                }
+            }
+        });
+    }
+
+    function comboitemclick(txtid, txtvalue) {
+        var a = document.getElementById(txtid)
+        a.value = txtvalue;
+    }
+
+    document.getElementById("worktable").style.height = document.body.clientHeight + "px";
+</script>
+
+
+

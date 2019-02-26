@@ -1,0 +1,44 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewBag.Title = "无操作权限";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <script type="text/javascript" language="javascript">
+        var windowWidth = $(window).width();
+        if (windowWidth < 1000) {
+            document.getElementById('mainmenu').style.display = 'none';
+            document.getElementById('maincaption').style.height = '86px';
+        }
+    </script>
+    <style>
+
+        
+    </style>
+
+</head>
+
+<body style="background-color: white; margin: 0; padding: 0;min-height:">
+    <div id="worktable" style="height: 100%; width: 100%; background-color: white; text-align:center;vertical-align:middle;font-size:20px;">
+        <br><br>
+        @ViewBag.Title
+        <br><br>
+        <button id="butSx" class="btn btn-primary" type="button" style="width:100px;" onclick="previousstep();">关　闭</button>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript" language="javascript">
+
+    function previousstep() {
+        window.location = "Index";
+    }
+
+    document.getElementById("worktable").style.height = document.body.clientHeight + "px";
+</script>
+
+

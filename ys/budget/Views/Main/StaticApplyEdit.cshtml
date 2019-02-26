@@ -1,0 +1,1861 @@
+﻿@using applyvisa.Models;
+@*@using System.Globalization;*@
+
+@{    
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "固定预算记录";
+
+    var cbzxs = ViewBag.cbzxs as List<cls成本中心>;
+    var ywlxs = ViewBag.ywlxs as List<cls业务类型>;
+    var yhs = ViewBag.yhs as List<cls用户>;
+    var acc_yusuan = TempData["acc_yusuan"] as cls预算单;
+    int i = 0;
+    var stryslx = "固 定 预 算";
+    if (acc_yusuan.类型 == 1)
+    {
+        stryslx = "项 目 预 算";
+        ViewBag.Title = "项目预算记录";
+    }
+    
+    //如果原来的成本中心编号不在现有系统
+    string schengbenbianhao = "";
+    try { schengbenbianhao = acc_yusuan.成本中心编号; }
+    catch { }
+    if (schengbenbianhao != "")
+    {
+        bool bfind = false;
+        for (i = 0; i < cbzxs.Count; i++)
+        {
+            if (cbzxs[i].成本中心编号 == schengbenbianhao)
+            {
+                bfind = true;
+                break;
+            }
+        }
+        if (!bfind)
+        {
+            cls成本中心 ccbzx = new cls成本中心();
+            ccbzx.成本中心编号 = schengbenbianhao;
+            cbzxs.Add(ccbzx);
+        }
+    }
+    //如果原来的业务类型不在现有系统
+    string syewuleixing = "";
+    try { syewuleixing = acc_yusuan.业务类型; }
+    catch { }
+    if (syewuleixing != "")
+    {
+        bool bfind = false;
+        for (i = 0; i < ywlxs.Count; i++)
+        {
+            if (ywlxs[i].业务类型 == syewuleixing)
+            {
+                bfind = true;
+                break;
+            }
+        }
+        if (!bfind)
+        {
+            cls业务类型 cywlx = new cls业务类型();
+            cywlx.业务类型 = syewuleixing;
+            ywlxs.Add(cywlx);
+        }
+    }
+
+    string FatherID = "";
+    try
+    {
+        if (acc_yusuan.父ID != "")
+        { 
+            FatherID = acc_yusuan.父ID.ToString(); 
+        }
+    }
+    catch { }
+
+    var ysmcs = ViewBag.ysmcs as List<commData>;
+    var zzdxs = ViewBag.zzdxs as List<commData>;
+    var zzsptfpsd = ViewBag.zzsptfpsd as string;
+    var zzszyfpsd = ViewBag.zzszyfpsd as string;
+    var jxssd = ViewBag.jxssd as string;
+    var xxssd = ViewBag.xxssd as string;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+
+    <style>
+        p.gaozhititle {
+            font-size: 18px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: black;
+            text-decoration: none;
+        }
+
+        #countrycolor {
+            color: #FF7F00;
+            text-wrap: none;
+        }
+
+        p.xingming {
+            font-size: 15px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: white;
+            background-color: #280581;
+            height: 35px;
+            vertical-align: middle;
+            display: block;
+            line-height: 35px;
+            text-align: left;
+        }
+
+        p.xiangqing {
+            font-size: 13px;
+            /*font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;*/
+            color: black;
+            background-color: #d6ddfb;
+            height: 100%;
+        }
+
+        .parent {
+            width: 100%;
+            height: 230px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .children {
+            display: inline-block;
+            width: 150px;
+            height: 150px;
+        }
+
+        .button {
+            font-size: 16px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: expanded;
+            color: #333333;
+        }
+
+        * + html .children {
+            display: inline;
+            zoom: 1;
+        }
+
+        * html .children {
+            display: inline;
+            zoom: 1;
+        }
+    </style>
+    <style type="text/css">
+        .pop-box {
+            /*弹出窗口后，弹出的DIV采用此CSS，保证置于最上层
+          z-index控制Z轴的坐标，数值越大，离用户越近
+        */
+            z-index: 9999999; /*这个数值要足够大，才能够显示在最上层*/
+            margin-bottom: 3px;
+            display: none;
+            position: absolute;
+        }
+
+        #bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            /*弹出窗口后，添加遮罩层，采用此CSS，将该层置于弹出DIV和页面层之间
+          z-index控制Z轴的坐标，数值越大，离用户越近  rgba(72, 74, 68, 0.46)
+        */
+            z-index: 1001;
+            background-color: #cfcdcd;
+            -moz-opacity: 0.7;
+            opacity: .70;
+            filter: alpha(opacity = 70);
+        }
+
+        td.style1 {
+            background-color: lightblue;
+            text-align: center;
+            color: gray;
+        }
+    </style>
+    <script type="text/javascript">
+        /*显示DIV*/
+        function popupDiv(div_id) {
+            // 获取传入的DIV
+            var $div_obj = $("#" + div_id);
+            // 计算机屏幕高度
+            var windowWidth = $(window).width();
+            // 计算机屏幕长度
+            var windowHeight = $(window).height();
+            // 取得传入DIV的高度
+            var popupHeight = $div_obj.height();
+            // 取得传入DIV的长度
+            var popupWidth = $div_obj.width();
+
+            var documentWidth = $(document).width();
+            var documentHeight = $(document).height();
+
+            $("<div id='bg'></div>").width(documentWidth * 0.99)
+                    .height(documentHeight * 0.99).click(function () {
+                        //hideDiv(div_id);
+                    }).appendTo("body").fadeIn(200);
+
+            var left1 = windowWidth / 2 - popupWidth / 2;
+            var top1 = windowHeight / 2 - popupHeight / 2;
+            if (left1 < 0) left1 = 0;
+            if (top1 < 0) top1 = 0;
+            if (left1 < $(document).scrollLeft()) left1 = $(document).scrollLeft();
+            if (top1 < $(document).scrollTop()) top1 = $(document).scrollTop();
+            top1 = $(document).scrollTop() - 30;   //直接靠上对齐
+            $div_obj.css({
+                "position": "absloute"
+            }).animate({
+                left: left1,
+                top: top1,
+                opacity: "show"
+            }, "slow");
+        }
+
+        /*隐藏DIV*/
+        function hideDiv(div_id) {
+            $("#bg").remove();
+            $("#" + div_id).animate({
+                left: 0,
+                top: 0,
+                opacity: "hide"
+            }, "slow");
+        }
+
+        function addrowSz(szlx, szid, jdf, je, rq, bz, szlx1, se, sl, fpzl) {
+            var s2 = 'tableyjsr';
+            if (szlx == "支出") {
+                s2 = 'tableyjzc';
+            }
+
+            //获取table
+            var tab = document.getElementById(s2);
+            //创建元素
+            var tr = document.createElement("tr"); tr.id = szid; tr.style = "border-bottom: solid 1px lightgray;";
+            var td1 = document.createElement("td"); td1.id = GUID(); td1.style = "height:25px;width: 200px; font-size: 13px; border-right: solid 1px lightgray;";
+            td1.innerHTML = jdf;
+            tr.appendChild(td1);
+            var td6 = document.createElement("td"); td6.id = GUID(); td6.style = "width: 60px; font-size: 13px; border-right: solid 1px lightgray;";
+            td6.innerHTML = szlx1;
+            tr.appendChild(td6);
+            var td2 = document.createElement("td"); td2.id = GUID(); td2.style = "width: 100px; font-size: 13px; border-right: solid 1px lightgray;";
+            td2.innerHTML = je;
+            tr.appendChild(td2);
+            var td3 = document.createElement("td"); td3.id = GUID(); td3.style = "width: 100px; font-size: 13px; border-right: solid 1px lightgray;";
+            td3.innerHTML = rq;
+            tr.appendChild(td3);
+            var td7 = document.createElement("td"); td7.id = GUID(); td7.style = "width: 90px; font-size: 13px; border-right: solid 1px lightgray;";
+            td7.innerHTML = se;
+            tr.appendChild(td7);
+            var td8 = document.createElement("td"); td8.id = GUID(); td8.style = "width: 90px; font-size: 13px; border-right: solid 1px lightgray;";
+            td8.innerHTML = sl;
+            tr.appendChild(td8);
+            var td9 = document.createElement("td"); td9.id = GUID(); td9.style = "width: 100px; font-size: 13px; border-right: solid 1px lightgray;";
+            td9.innerHTML = fpzl;
+            tr.appendChild(td9);
+            var td4 = document.createElement("td"); td4.id = GUID(); td4.style = "width: 350px; font-size: 13px; border-right: solid 1px lightgray;";
+            td4.innerHTML = bz;
+            tr.appendChild(td4);
+            var td5 = document.createElement("td"); td5.id = GUID(); td5.style = "width: 30px;";
+            td5.innerHTML = "<button class='btn btn-warning' type='button' onclick=\"ysszdel(\'" + szid + "\','" + s2 + "');\">删除</button>";
+            tr.appendChild(td5);
+            tab.appendChild(tr);
+
+        }
+        function addrowZz(szid, zzdx, zzje, zzbl, zzbz) {
+            //获取table
+            var tab = document.getElementById("tablenbzz");
+            //创建元素
+            var tr = document.createElement("tr"); tr.id = szid; tr.style = "border-bottom: solid 1px lightgray;";
+            var td1 = document.createElement("td"); td1.id = GUID(); td1.style = "height:25px;width: 250px; font-size: 13px; border-right: solid 1px lightgray;";
+            td1.innerHTML = zzdx;
+            tr.appendChild(td1);
+            var td2 = document.createElement("td"); td2.id = GUID(); td2.style = "width: 150px; font-size: 13px; border-right: solid 1px lightgray;";
+            td2.innerHTML = zzje;
+            tr.appendChild(td2);
+            var td3 = document.createElement("td"); td3.id = GUID(); td3.style = "width: 150px; font-size: 13px; border-right: solid 1px lightgray;";
+            td3.innerHTML = zzbl;
+            tr.appendChild(td3);
+            var td4 = document.createElement("td"); td4.id = GUID(); td4.style = "width: 540px; font-size: 13px; border-right: solid 1px lightgray;";
+            td4.innerHTML = zzbz;
+            tr.appendChild(td4);
+            var td5 = document.createElement("td"); td5.id = GUID(); td5.style = "width: 30px;";
+            td5.innerHTML = "<button class='btn btn-warning' type='button' onclick=\"nbzzdel(\'" + szid + "\','tablenbzz');\">删除</button>";
+            tr.appendChild(td5);
+            tab.appendChild(tr);
+            
+        }
+        function addrowFp(szid, spf, fpzl, ysse, sd, fpbz) {
+            //获取table
+            var tab = document.getElementById("tableyjse");
+            //创建元素
+            var tr = document.createElement("tr"); tr.id = szid; tr.style = "border-bottom: solid 1px lightgray;";
+            var td1 = document.createElement("td"); td1.id = GUID(); td1.style = "height:25px;width: 250px; font-size: 13px; border-right: solid 1px lightgray;";
+            td1.innerHTML = spf;
+            tr.appendChild(td1);
+            var td2 = document.createElement("td"); td2.id = GUID(); td2.style = "width: 150px; font-size: 13px; border-right: solid 1px lightgray;";
+            td2.innerHTML = fpzl;
+            tr.appendChild(td2);
+            var td3 = document.createElement("td"); td3.id = GUID(); td3.style = "width: 150px; font-size: 13px; border-right: solid 1px lightgray;";
+            td3.innerHTML = ysse;
+            tr.appendChild(td3);
+            var td4 = document.createElement("td"); td4.id = GUID(); td4.style = "width: 100px; font-size: 13px; border-right: solid 1px lightgray;";
+            td4.innerHTML = sd;
+            tr.appendChild(td4);
+            var td5 = document.createElement("td"); td5.id = GUID(); td5.style = "width: 440px; font-size: 13px; border-right: solid 1px lightgray;";
+            td5.innerHTML = fpbz;
+            tr.appendChild(td5);
+            var td6 = document.createElement("td"); td6.id = GUID(); td6.style = "width: 30px;";
+            td6.innerHTML = "<button class='btn btn-warning' type='button' onclick=\"ysfpdel(\'" + szid + "\','tableyjse');\">删除</button>";
+            tr.appendChild(td6);
+            tab.appendChild(tr);
+        }
+
+        //生成随机GUID
+        function GUID() {
+            var G1 = (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1) + (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+            var G2 = (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1) + (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+            return (G1 + G2);
+        }
+        function delrow(obj) {
+            var trId = obj.parentNode.parentNode.id;
+            //alert(trId);
+            var trObj = document.getElementById(trId);
+            tableSx.removeChild(trObj);
+        }
+        function deletetr(tdobject) {
+            var td = $(tdobject);
+            td.parents("tr").remove();
+        }
+    </script>
+</head>
+
+<body style="background-color: #2A293B;">
+
+    <div id="popSZ" class="pop-box">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popSZ');">×</button>
+                    <h4 id="lblsz" class="modal-title">预算</h4><input id="txtszlx" type="hidden">
+                </div>
+                <div class="panel-body" style="height: 100%;">
+                    <div class="parent" style="text-align: left; height: auto;">
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszf" style="border:none;background-color:white;">收支方　　　</span>
+                            <input id="txtszf" type="text" class="form-control">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszf" style="border:none;background-color:white;">类型　　　　</span>
+                            <select id="txtszlx1" class="form-control">
+                                <option value=" "></option>
+                                <option value="激励">激励</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszje" style="border:none;background-color:white;">预算收支金额</span>
+                            <input id="txtszje" type="text" class="form-control">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszrq" style="border:none;background-color:white;">预算收支日期</span>
+                            <input id="txtszrq" type="date" class="form-control">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszse" style="border:none;background-color:white;">收支税额　　</span>
+                            <input id="txtszse" type="text" class="form-control">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" onclick="shouzhishuie();">计算</button>
+                            </span>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszsl" style="border:none;background-color:white;">收支税率　　</span>
+                            @*<input id="txtszsl" type="text" class="form-control">*@
+                            <select id="txtszsl" class="form-control">
+                                <option value=" "></option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszfpzl" style="border:none;background-color:white;">收支发票种类</span>
+                            <select id="txtszfpzl" class="form-control">
+                                <option value="无发票">无发票</option>
+                                <option value="增值税专用发票">增值税专用发票</option>
+                                <option value="增值税普通发票">增值税普通发票</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszbz" style="border:none;background-color:white;">备注　　　　</span>
+                            <input id="txtszbz" type="text" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input id="lblMsg1" type="text" readonly="readonly" style="border-style:none;color:red;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popSZ');">　取　消　</button>
+                    <button id="butSzbc" type="button" class="btn btn-primary">　确　定　</button>
+                    <input type="hidden" id="txtszid"><input type="hidden" id="txtszismodify">
+                    <input type="hidden" id="txtjxssd" value="@jxssd">
+                    <input type="hidden" id="txtxxssd" value="@xxssd">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="popZZ" class="pop-box">
+        <input id="txtsumyjsr" type="hidden">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popZZ');">×</button>
+                    <h4 class="modal-title">内部转账</h4>
+                </div>
+                <div class="panel-body" style="height: 100%;">
+                    <div class="parent" style="text-align: left; height: auto;">
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblzzdx" style="border:none;background-color:white;">转账对象　</span>
+                            @*<input id="txtzzdx" type="text" class="form-control">*@
+                            <select id="txtzzdx" class="form-control">
+                                <option value=""></option>
+                                @{
+                                    for (i = 0; i < zzdxs.Count; i++)
+                                    {
+                                        <option value="@zzdxs[i].Fld1">@zzdxs[i].Fld1</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszje" style="border:none;background-color:white;">转账金额　</span>
+                            <input id="txtzzje" type="text" class="form-control" onkeyup="jisuanzz(0);">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszrq" style="border:none;background-color:white;">转账比例％</span>
+                            <input id="txtzzbl" type="text" class="form-control" onkeyup="jisuanzz(1);" readonly="readonly">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszbz" style="border:none;background-color:white;">备注　　　</span>
+                            <input id="txtzzbz" type="text" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input id="lblMsg2" type="text" readonly="readonly" style="border-style:none;color:red;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popZZ');">　取　消　</button>
+                    <button id="butZzbc" type="button" class="btn btn-primary">　确　定　</button>
+                    <input type="hidden" id="txtzzid"><input type="hidden" id="txtzzismodify">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="popFP" class="pop-box">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popFP');">×</button>
+                    <h4 class="modal-title">应交税额</h4>
+                </div>
+                <div class="panel-body" style="height: 100%;">
+                    <div class="parent" style="text-align: left; height: auto;">
+                        <div class="input-group">
+                            <span class="input-group-addon" style="border:none;background-color:white;">收票方　</span>
+                            <input id="txtfpspf" type="text" class="form-control">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" style="border:none;background-color:white;">发票种类</span>
+                            <select id="txtfpfpzl" class="form-control" onchange="zzssd();">
+                                <option value=""></option>
+                                <option value="增值税普通发票">增值税普通发票</option>
+                                <option value="增值税专用发票">增值税专用发票</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" style="border:none;background-color:white;">应收税额</span>
+                            <input id="txtfpysse" type="text" class="form-control">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" style="border:none;background-color:white;">税点　　</span>
+                            <input id="txtfpsd" type="text" class="form-control">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" style="border:none;background-color:white;">备注　　</span>
+                            <input id="txtfpbz" type="text" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input id="lblMsg3" type="text" readonly="readonly" style="border-style:none;color:red;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popFP');">　取　消　</button>
+                    <button id="butFpbc" type="button" class="btn btn-primary">　确　定　</button>
+                    <input type="hidden" id="txtfpid"><input type="hidden" id="txtfpismodify">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="popRenyuan" class="pop-box">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popRenyuan');">×</button>
+                    <h4 class="modal-title">请选择：</h4>
+                </div>
+                <div class="panel-body" style="height: 100%;">
+                    <table style="width:100%">
+                        @{
+                            string syh1 = "";
+                            string syh2 = "";
+                            string syh3 = "";
+                            string syh4 = "";
+                            for (i = 0; i < yhs.Count; i = i + 4)
+                            {
+                                syh1 = "";
+                                syh2 = "";
+                                syh3 = "";
+                                syh4 = "";
+                                if (i < yhs.Count)
+                                {
+                                    syh1 = yhs[i].姓名;
+                                }
+                                if ((i + 1) < yhs.Count)
+                                {
+                                    syh2 = yhs[i + 1].姓名;
+                                }
+                                if ((i + 2) < yhs.Count)
+                                {
+                                    syh3 = yhs[i + 2].姓名;
+                                }
+                                if ((i + 3) < yhs.Count)
+                                {
+                                    syh4 = yhs[i + 3].姓名;
+                                }
+                                <tr style="width:100%">
+                                    <td style="width: 25%; height: 20px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkry" type="checkbox" value="@syh1">@syh1
+                                    </td>
+                                    <td style="width: 25%; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkry" type="checkbox" value="@syh2">@syh2
+                                    </td>
+                                    <td style="width: 25%; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkry" type="checkbox" value="@syh3">@syh3
+                                    </td>
+                                    <td style="width: 25%; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkry" type="checkbox" value="@syh4">@syh4
+                                    </td>
+                                </tr>
+                            }
+                            
+                        }
+
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <input id="lblMsg4" type="text" readonly="readonly" style="border-style:none;color:red;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popRenyuan');">　取　消　</button>
+                    <button type="button" class="btn btn-primary" onclick="configDiv_Yh('popRenyuan');">　确　定　</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="popMSG" class="pop-box">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="panel-body" style="height: 100%;">
+                     <span class="input-group-addon" style="border:none;background-color:white;">预算申请已经提交审批。 </span>
+                </div>
+                <div class="modal-footer" style="text-align:center;">
+                    <button type="button" class="btn btn-primary" onclick="guanbiMSG();">　确　定　</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <input type="hidden" id="txtjzid" value="@acc_yusuan.ID.ToString()">
+    <input type="hidden" id="txtgl_lx" value="@acc_yusuan.类型.ToString()">
+    <input type="hidden" id="txtzzsptfpsd" value="@zzsptfpsd">
+    <input type="hidden" id="txtzzszyfpsd" value="@zzszyfpsd">
+
+    <input type="hidden" id="txtFatherID" value="@FatherID">
+    
+    
+    <table id="worktable" style="width: 1024px; background-color: white; min-height: 400px; margin-right: auto; margin-left: auto;">
+        <tr style="border-bottom:solid 2px gray;">
+            <td colspan="2" style="text-align:center;height:50px;background-color:#f8f2a9;">
+                <p class="gaozhititle">@stryslx 申 请</p>
+            </td>
+        </tr>
+        <tr style="border-bottom:solid 1px lightgray;">
+            <td style="text-align:left;height:30px;">
+                <p style="font-size:15px;margin-left:12px;">预算编号：<input id="txtysbh" type="text" readonly="readonly" style="z-index: 0; border: none; width: 200px;" value="@acc_yusuan.预算编号"></p>
+            </td>
+            <td style="text-align:right;">
+                <p style="font-size:15px;">
+                    申请人：<input id="txtyssqr" type="text" readonly="readonly" style="z-index: 0; border: none; width: 100px; " value="@acc_yusuan.申请人">
+                    申请日期：<input id="txtyssqrq" type="text" readonly="readonly" style="z-index: 0; border: none; width: 150px;" value='@acc_yusuan.申请日期.ToString("yyyy-MM-dd")'>
+                </p>
+            </td>
+        </tr>
+        <tr style="border-bottom:solid 1px lightgray;">
+            <td colspan="2" style="vertical-align:central;height:10px;">
+                <table style="width:100%;height:10px;">
+                    <tr style="border-bottom:solid 1px lightgray;">
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">预算名称</span>
+                        </td>
+                        <td style="width: 420px; border-right: solid 1px lightgray;">
+
+                            @{
+                                if (acc_yusuan.类型 == 1)
+                                {
+                                    <input id="txtysmc" type="text" style="width: 400px; height: 30px; margin-left: 5px; border: none; font-size: 13px;" value="@acc_yusuan.预算名称">
+                                }
+                                else
+                                {
+                                    <select id="txtysmc" style="width: 400px; height: 30px; margin-left: 5px; border: none; font-size: 13px;">
+                                        <option value=""></option>
+                                        <option value="@acc_yusuan.预算名称" selected="selected">@acc_yusuan.预算名称</option>
+                                        @{
+                                            for (i = 0; i < ysmcs.Count; i++)
+                                            {
+                                                <option value="@ysmcs[i].Fld1">@ysmcs[i].Fld1</option>
+                                            }
+                                        }
+                                    </select>
+                                }
+                            }
+
+                        </td>
+                        <td style="width: 80px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">成本中心编号</span>
+                        </td>
+                        <td style="width: 500px">
+                            <select id="txtcbzxbh" style="width: 400px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " >
+                                <option value=""></option>
+                                @{
+                                    for (i = 0; i < cbzxs.Count; i++)
+                                    {
+                                        if (cbzxs[i].成本中心编号 == acc_yusuan.成本中心编号)
+                                        {
+                                            <option value="@cbzxs[i].成本中心编号" selected="selected">@cbzxs[i].成本中心编号</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@cbzxs[i].成本中心编号">@cbzxs[i].成本中心编号</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+                    <tr style="border-bottom:solid 1px lightgray;" id="tr_ywlx">
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">业务类型</span>
+                        </td>
+                        <td style="width: 420px; border-right: solid 1px lightgray;">
+                            <select id="txtysywlx" style="width: 400px; height: 30px; margin-left: 5px; border: none; font-size: 13px; ">
+                                <option value=""></option>
+                                @{
+                                    for (i = 0; i < ywlxs.Count; i++)
+                                    {
+                                        if (ywlxs[i].业务类型 == acc_yusuan.业务类型)
+                                        {
+                                            <option value="@ywlxs[i].业务类型" selected="selected">@ywlxs[i].业务类型</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@ywlxs[i].业务类型">@ywlxs[i].业务类型</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </td>
+                        <td style="width: 80px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">销　　售</span>
+                        </td>
+                        <td style="width: 500px">
+                            <input id="txtysxs" type="text" style="width: 380px; height: 30px; margin-left: 5px; border: none; font-size: 13px;" value="@acc_yusuan.销售"><button class="btn btn-sm" type="button" onclick="popupDiv('popRenyuan');">…</button>
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+                    <tr style="border-bottom:solid 1px lightgray;">
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">预算说明</span>
+                        </td>
+                        <td colspan="3" style="width:auto;">
+                            <textarea id="txtyssm" style="z-index: 0; height: 60px; width: 925px; border: none; margin-left: 5px; font-size: 13px; ">@acc_yusuan.预算说明</textarea>
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 80px; height: 20px;text-align:center; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">附　　件</span>
+                            <button class="btn btn-primary" type="button" id="butnewfj" onclick="fujian();">添加</button>
+                        </td>
+                        <td colspan="3" style="width:auto;">
+                            <div id="txtfj" style="width:100px;">
+
+                            </div>
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2" style="vertical-align: top; height: 10px;">
+                <table id="tableyjsr" style="width: 100%; text-align: center;">
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td colspan="9" style="width: 100%;height:10px;"></td>
+                    </tr>
+                    <tr style="background-color: #FAFAFA; border-bottom: solid 1px lightgray;">
+                        <td colspan="8" style="width: auto;height:34px;">
+                            <p style="font-size:15px;">预　算　收　入</p>
+                        </td>
+                        <td style="width: 30px;">
+                            <button class="btn btn-primary" type="button" id="butnewyjsz1">添加</button>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td style="height: 25px; width: 200px; font-size: 13px; border-right: solid 1px lightgray;">
+                            付款方
+                        </td>
+                        <td style="width: 60px; font-size: 13px; border-right: solid 1px lightgray;">
+                            类型
+                        </td>
+                        <td style="width: 100px; font-size: 13px; border-right: solid 1px lightgray;">
+                            预算收入金额
+                        </td>
+                        <td style="width: 100px; font-size: 13px; border-right: solid 1px lightgray;">
+                            预算收款日期
+                        </td>
+                        <td style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">
+                            销项税额
+                        </td>
+                        <td style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">
+                            销项税率
+                        </td>
+                        <td style="width: 100px; font-size: 13px; border-right: solid 1px lightgray;">
+                            销项发票种类
+                        </td>
+                        <td style="width: 350px; font-size: 13px;">
+                            备注
+                        </td>
+                        <td style="width: 30px;"></td>
+                    </tr>
+                    @{                        
+                        for (i = 0; i < acc_yusuan.预算收支.Count; i++)
+                        {
+                            if (acc_yusuan.预算收支[i].收支 == "收入")
+                            {
+                                //string yssrje = acc_yusuan.预算收支[i].金额.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"));
+                                //string yssrje = acc_yusuan.预算收支[i].金额.ToString("C");
+                                string yssrrq = "";
+                                if(acc_yusuan.预算收支[i].日期>DateTime.Parse("2000-01-01")) 
+                                {
+                                    yssrrq = acc_yusuan.预算收支[i].日期.ToString("yyyy-MM-dd");
+                                }
+                                    
+                                string tmpa1 = Guid.NewGuid().ToString();  //"tableyssr_row" + i.ToString() + "col0";
+                                string tmpa2 = Guid.NewGuid().ToString();  //"tableyssr_row" + i.ToString() + "col1";
+                                string tmpa3 = Guid.NewGuid().ToString();  //"tableyssr_row" + i.ToString() + "col2";
+                                string tmpa4 = Guid.NewGuid().ToString();  //"tableyssr_row" + i.ToString() + "col3";
+                                string tmpa5 = Guid.NewGuid().ToString();  //"tableyssr_row" + i.ToString() + "col4";
+                                string tmpa6 = Guid.NewGuid().ToString();  //"tableyssr_row" + i.ToString() + "col4";
+                                string tmpa7 = Guid.NewGuid().ToString();
+                                string tmpa8 = Guid.NewGuid().ToString();
+                                string tmpa9 = Guid.NewGuid().ToString();
+                                <tr id="@acc_yusuan.预算收支[i].ID.ToString()" style="border-bottom: solid 1px lightgray;">
+                                    <td id="@tmpa1" style="height: 25px; width: 200px; font-size: 13px; border-right: solid 1px lightgray;"><a href="#" onclick="modifySZ(0,'@acc_yusuan.预算收支[i].ID', '收入' , '@acc_yusuan.预算收支[i].借贷方' , '@acc_yusuan.预算收支[i].金额.ToString()' , '@yssrrq' , '@acc_yusuan.预算收支[i].备注', '@acc_yusuan.预算收支[i].收付税额.ToString()', '@acc_yusuan.预算收支[i].收付税率.ToString()', '@acc_yusuan.预算收支[i].收付发票种类');">@acc_yusuan.预算收支[i].借贷方</a></td>
+                                    <td id="@tmpa2" style="width: 60px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].类型</td>
+                                    <td id="@tmpa3" style="width: 100px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].金额.ToString("C")</td>
+                                    <td id="@tmpa4" style="width: 10px; font-size: 13px; border-right: solid 1px lightgray;">@yssrrq</td>
+                                    <td id="@tmpa7" style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].收付税额.ToString("C")</td>
+                                    <td id="@tmpa8" style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].收付税率.ToString()</td>
+                                    <td id="@tmpa9" style="width: 100px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].收付发票种类</td>
+                                    <td id="@tmpa5" style="width: 350px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].备注</td>
+                                    <td id="@tmpa6" style="width: 30px;"><button class='btn btn-warning' type='button' onclick="ysszdel('@acc_yusuan.预算收支[i].ID.ToString()','tableyjsr');">删除</button></td>
+                                </tr>
+                            }
+                        }
+                    }
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2" style="vertical-align: top; height: 10px;">
+                <table id="tableyjzc" style="width: 100%; text-align: center;">
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td colspan="9" style="width: 100%;height:10px;"></td>
+                    </tr>
+                    <tr style="background-color: #FAFAFA; border-bottom: solid 1px lightgray;">
+                        <td colspan="8" style="width: auto;height:34px;">
+                            <p style="font-size:15px;">预　算　支　出</p>
+                        </td>
+                        <td style="width: 30px;">
+                            <button class="btn btn-primary" type="button" id="butnewyjsz2">添加</button>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td style="height: 25px; width: 200px; font-size: 13px; border-right: solid 1px lightgray;">
+                            收款方
+                        </td>
+                        <td style="width: 60px; font-size: 13px; border-right: solid 1px lightgray;">
+                            类型
+                        </td>
+                        <td style="width: 100px; font-size: 13px; border-right: solid 1px lightgray;">
+                            预算支出金额
+                        </td>
+                        <td style="width: 100px; font-size: 13px; border-right: solid 1px lightgray;">
+                            预算付款日期
+                        </td>
+                        <td style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">
+                            进项税额
+                        </td>
+                        <td style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">
+                            进项税率
+                        </td>
+                        <td style="width: 100px; font-size: 13px; border-right: solid 1px lightgray;">
+                            进项发票种类
+                        </td>
+                        <td style="width: 350px; font-size: 13px;">
+                            备注
+                        </td>
+                        <td style="width: 30px;"></td>
+                    </tr>
+                    @{
+                        for (i = 0; i < acc_yusuan.预算收支.Count; i++)
+                        {
+                            if (acc_yusuan.预算收支[i].收支 == "支出")
+                            {
+                                string yszcrq = "";
+                                if (acc_yusuan.预算收支[i].日期 > DateTime.Parse("2000-01-01"))                                
+                                {
+                                    yszcrq = acc_yusuan.预算收支[i].日期.ToString("yyyy-MM-dd");
+                                }
+                                string tmpa1 = "tableyszc_row" + i.ToString() + "col0";
+                                string tmpa2 = "tableyszc_row" + i.ToString() + "col1";
+                                string tmpa3 = "tableyszc_row" + i.ToString() + "col2";
+                                string tmpa4 = "tableyszc_row" + i.ToString() + "col3";
+                                string tmpa5 = "tableyszc_row" + i.ToString() + "col4";
+                                string tmpa6 = "tableyszc_row" + i.ToString() + "col5";
+                                string tmpa7 = "tableyszc_row" + i.ToString() + "col6";
+                                string tmpa8 = "tableyszc_row" + i.ToString() + "col7";
+                                string tmpa9 = "tableyszc_row" + i.ToString() + "col8";
+                                <tr id="@acc_yusuan.预算收支[i].ID.ToString()" style="border-bottom: solid 1px lightgray;">
+                                    <td id="@tmpa1" style="height: 25px; width: 200px; font-size: 13px; border-right: solid 1px lightgray;"><a href="#" onclick="modifySZ(1,'@acc_yusuan.预算收支[i].ID', '支出', '@acc_yusuan.预算收支[i].借贷方', '@acc_yusuan.预算收支[i].金额.ToString()', '@yszcrq', '@acc_yusuan.预算收支[i].备注', '@acc_yusuan.预算收支[i].收付税额.ToString()', '@acc_yusuan.预算收支[i].收付税率.ToString()', '@acc_yusuan.预算收支[i].收付发票种类');">@acc_yusuan.预算收支[i].借贷方</a></td>
+                                    <td id="@tmpa2" style="width: 60px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].类型</td>
+                                    <td id="@tmpa3" style="width: 100px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].金额.ToString("C")</td>
+                                    <td id="@tmpa4" style="width: 100px; font-size: 13px; border-right: solid 1px lightgray;">@yszcrq</td>
+                                    <td id="@tmpa7" style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].收付税额.ToString("C")</td>
+                                    <td id="@tmpa8" style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].收付税率.ToString()</td>
+                                    <td id="@tmpa9" style="width: 100px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].收付发票种类</td>
+                                    <td id="@tmpa5" style="width: 350px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].备注</td>
+                                    <td id="@tmpa6" style="width: 30px;"><button class='btn btn-warning' type='button' onclick="ysszdel('@acc_yusuan.预算收支[i].ID.ToString()','tableyjsr');">删除</button></td>
+                                </tr>
+                            }
+                        }
+                    }
+                </table>
+            </td>
+        </tr>
+
+        <tr id="tr_nbzz">
+            <td colspan="2" style="vertical-align: top; height: 10px;">
+                <table id="tablenbzz" style="width: 100%; text-align: center;">
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td colspan="5" style="width: 100%;height:10px;"></td>
+                    </tr>
+                    <tr style="background-color: #FAFAFA; border-bottom: solid 1px lightgray;">
+                        <td colspan="4" style="width: auto;height:34px;">
+                            <p style="font-size:15px;">内　部　转　账</p>
+                        </td>
+                        <td style="width: 30px;">
+                            <button class="btn btn-primary" type="button" id="butnewnbzz">添加</button>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td style="height: 25px; width: 250px; font-size: 13px; border-right: solid 1px lightgray;">
+                            转账对象
+                        </td>
+                        <td style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;">
+                            转账金额
+                        </td>
+                        <td style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;">
+                            @*转账比例%*@
+                        </td>
+                        <td style="width: 540px; font-size: 13px;">
+                            备注
+                        </td>
+                        <td style="width: 30px;"></td>
+                    </tr>
+                    @{
+                        for (i = 0; i < acc_yusuan.内部转账.Count; i++)
+                        {
+                            string tmpa1 = "tablenbzz_row" + i.ToString() + "col0";
+                            string tmpa2 = "tablenbzz_row" + i.ToString() + "col1";
+                            string tmpa3 = "tablenbzz_row" + i.ToString() + "col2";
+                            string tmpa4 = "tablenbzz_row" + i.ToString() + "col3";
+                            string tmpa5 = "tablenbzz_row" + i.ToString() + "col4";
+                            <tr id="@acc_yusuan.内部转账[i].ID.ToString()" style="border-bottom: solid 1px lightgray;">
+                                <td id="@tmpa1" style="height: 25px; width: 250px; font-size: 13px; border-right: solid 1px lightgray;"><a href="#" onclick="modifyZZ('@acc_yusuan.内部转账[i].ID', '@acc_yusuan.内部转账[i].转账对象', '@acc_yusuan.内部转账[i].转账金额', '@acc_yusuan.内部转账[i].转账比例', '@acc_yusuan.内部转账[i].备注');">@acc_yusuan.内部转账[i].转账对象</a></td>
+                                <td id="@tmpa2" style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.内部转账[i].转账金额</td>
+                                <td id="@tmpa3" style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;"></td>
+                                <td id="@tmpa4" style="width: 540px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.内部转账[i].备注</td>
+                                <td id="@tmpa5" style="width: 30px;"><button class='btn btn-warning' type='button' onclick="nbzzdel('@acc_yusuan.内部转账[i].ID.ToString()','tablenbzz');">删除</button></td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </td>
+        </tr>
+
+        <tr id="tr_yjse" style="display:none;">
+            <td colspan="2" style="vertical-align: top; height: 10px;">
+                <table id="tableyjse" style="width: 100%; text-align: center;">
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td colspan="6" style="width: 100%;height:10px;"></td>
+                    </tr>
+                    <tr style="background-color: #FAFAFA; border-bottom: solid 1px lightgray;">
+                        <td colspan="5" style="width: auto;height:34px;">
+                            <p style="font-size:15px;">应　交　税　额</p>
+                        </td>
+                        <td style="width: 30px;">
+                            <button class="btn btn-primary" type="button" id="butnewfp">添加</button>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td style="height: 25px; width: 250px; font-size: 13px; border-right: solid 1px lightgray;">
+                            收票方
+                        </td>
+                        <td style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;">
+                            发票种类
+                        </td>
+                        <td style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;">
+                            应收税额
+                        </td>
+                        <td style="width: 100px; font-size: 13px; border-right: solid 1px lightgray;">
+                            税点
+                        </td>
+                        <td style="width: 440px; font-size: 13px;">
+                            备注
+                        </td>
+                        <td style="width: 30px;"></td>
+                    </tr>
+                    @{
+                        for (i = 0; i < acc_yusuan.预算发票.Count; i++)
+                        {
+                            string tmpa1 = "tableyjse_row" + i.ToString() + "col0";
+                            string tmpa2 = "tableyjse_row" + i.ToString() + "col1";
+                            string tmpa3 = "tableyjse_row" + i.ToString() + "col2";
+                            string tmpa4 = "tableyjse_row" + i.ToString() + "col3";
+                            string tmpa5 = "tableyjse_row" + i.ToString() + "col4";
+                            string tmpa6 = "tableyjse_row" + i.ToString() + "col5";
+                            <tr id="@acc_yusuan.预算发票[i].ID.ToString()" style="border-bottom: solid 1px lightgray;">
+                                <td id="@tmpa1" style="height: 25px; width: 250px; font-size: 13px; border-right: solid 1px lightgray;"><a href="#" onclick="modifyFP('@acc_yusuan.预算发票[i].ID', '@acc_yusuan.预算发票[i].收票方', '@acc_yusuan.预算发票[i].发票种类', '@acc_yusuan.预算发票[i].应收税额', '@acc_yusuan.预算发票[i].税点', '@acc_yusuan.预算发票[i].备注');">@acc_yusuan.预算发票[i].收票方</a></td>
+                                <td id="@tmpa2" style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算发票[i].发票种类</td>
+                                <td id="@tmpa3" style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算发票[i].应收税额</td>
+                                <td id="@tmpa4" style="width: 100px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算发票[i].税点</td>
+                                <td id="@tmpa5" style="width: 440px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算发票[i].备注</td>
+                                <td id="@tmpa6" style="width: 30px;"><button class='btn btn-warning' type='button' onclick="ysfpdel('@acc_yusuan.预算发票[i].ID.ToString()','tableyjse');">删除</button></td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2" style="vertical-align:top;">
+                <table style="width:100%;height:100px;">
+                    <tr style="width:100%">
+                        <td style="text-align: center; width: 20%"><button class="btn btn-primary" type="button" style="width:100px;" onclick="baocun();">保　存</button></td>
+                        <td style="text-align: center; width: 20%"><button class="btn btn-primary" type="button" style="width:100px;" onclick="songshen();">送　审</button></td>
+                        <td style="text-align: center; width: 20%"><button class="btn btn-primary" type="button" style="width:100px;" onclick="shuaxin();">刷　新</button></td>
+                        <td style="text-align: center; width: 20%"><button class="btn btn-primary" type="button" style="width:100px;" onclick="shanchuys();">删　除</button></td>
+                        <td style="text-align: center; width: 20%"><button class="btn btn-primary" type="button" style="width:100px;" onclick="quxiao();">退　出</button></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+    </table>
+
+</body>
+</html>
+
+<script type="text/javascript" src="~/Others/js/alert.js"></script>
+<script type="text/javascript" src="~/Others/js/confirm.js"></script>
+<script type="text/javascript" src="~/Others/js/cb_jsmath.js"></script>
+<script type="text/javascript" language="javascript">
+    function baocun() {
+        var s1 = $("#txtysmc").val();
+        if (s1 == "" || undefined || null) {
+            alert('请输入预算名称。');
+            return false;
+        }
+        var s2 = $("#txtcbzxbh").val();
+        if (s2 == "" || undefined || null) {
+            alert('请输入成本中心编号。');
+            return false;
+        }
+        var s3 = $("#txtysbh").val();
+        if (s3 == "" || undefined || null) {
+            s3 = "";
+        }
+        var s4 = $("#txtyssm").val();
+        if (s4 == "" || undefined || null) {
+            s4 = "";
+        }
+        var s5 = $("#txtysywlx").val();
+        if (s5 == "" || undefined || null) {
+            s5 = "";
+        }
+        var s6 = $("#txtysxs").val();
+        if (s6 == "" || undefined || null) {
+            s6 = "";
+        }
+
+        //var tab = document.getElementById("tableyjsr");
+        //if (tab.rows.length < 1) {
+        //    alert('请输入申请人。');
+        //    return false;
+        //}
+
+        $.ajax({
+            type: 'POST',
+            url: "/Main/SaveExistStaticApply",
+            data: {
+                tysmc: s1,
+                tcbzxbh: s2,
+                tyssm: s4,
+                tywlx: s5,
+                txs: s6
+            },
+            dataType: "text",
+            success: function (sesponseTest) {
+                switch (sesponseTest) {
+                    case 400001:
+                    case 400002:
+                        alert('保存失败。');
+                        break;
+                    default:
+                        alert('保存成功。');
+                        break;
+                }
+            }
+        });
+    }
+    
+
+    function lclose(strid) {
+        var ad = document.getElementById(strid)
+        ad.style.display = (ad.style.display == 'none') ? '' : 'none';
+    }
+
+    function quxiao() {
+        window.location.href = "/Home/Index";
+    }
+
+    function comboitemclick(txtid, txtvalue) {
+        var a = document.getElementById(txtid)
+        a.value = txtvalue;
+    }
+
+    //预算收支删除
+    function ysszdel(sid, tablesz) {
+        var b1 = confirm("确认要删除该预算收入/支出？");
+        if (b1) {
+            $.ajax({
+                type: 'POST',
+                url: "/Main/DelSz",
+                data: {
+                    savetodb: true,
+                    tid: sid
+                    },
+                dataType: "text",
+                success: function (sesponseTest) {                    
+                    switch (sesponseTest) {
+                        case 300001:
+                        case 300002:
+                        case 300005:
+                            break;
+                        default:
+                            var tab = document.getElementById(tablesz);
+                            var trObj = document.getElementById(sid);
+                            trObj.parentNode.removeChild(trObj);  //tab.removeChild(trObj);                            
+                            break;
+                    }
+                }
+            });
+        }        
+    }
+    //内部转账删除
+    function nbzzdel(sid, tablename) {
+        var b1 = confirm("确认要删除该内部转账？");
+        if (b1) {
+            $.ajax({
+                type: 'POST',
+                url: "/Main/DelZz",
+                data: {
+                    savetodb: true,
+                    tid: sid
+                },
+                dataType: "text",
+                success: function (sesponseTest) {
+                    switch (sesponseTest) {
+                        case 300001:
+                        case 300002:
+                        case 300005:
+                            break;
+                        default:
+                            var tab = document.getElementById(tablename);
+                            var trObj = document.getElementById(sid);
+                            trObj.parentNode.removeChild(trObj);  //tab.removeChild(trObj);
+                            break;
+                    }
+                }
+            });
+        }
+    }
+    //预算发票删除
+    function ysfpdel(sid, tablename) {
+        var b1 = confirm("确认要删除该应交税额？");
+        if (b1) {
+            $.ajax({
+                type: 'POST',
+                url: "/Main/DelFp",
+                data: {
+                    savetodb: true,
+                    tid: sid
+                },
+                dataType: "text",
+                success: function (sesponseTest) {
+                    switch (sesponseTest) {
+                        case 300001:
+                        case 300002:
+                        case 300005:
+                            break;
+                        default:
+                            var tab = document.getElementById(tablename);
+                            var trObj = document.getElementById(sid);
+                            trObj.parentNode.removeChild(trObj);  //tab.removeChild(trObj);
+                            break;
+                    }
+                }
+            });
+        }
+    }
+
+
+    //预计收入新增
+    $(document).ready(function () {
+        $("#butnewyjsz1").click(function () {
+            var a1 = document.getElementById("lblsz");
+            a1.innerHTML = "预算收入";
+            var a2 = document.getElementById("lblszf");
+            a2.innerHTML = "付款方　　　";
+            var a3 = document.getElementById("lblszje");
+            a3.innerHTML = "预算收入金额";
+            var a4 = document.getElementById("lblszrq");
+            a4.innerHTML = "预算收款日期";
+            var a5 = document.getElementById("lblszse");
+            a5.innerHTML = "销项税额　　";
+            var a6 = document.getElementById("lblszsl");
+            a6.innerHTML = "销项税率　　";
+            var a7 = document.getElementById("lblszfpzl");
+            a7.innerHTML = "销项发票种类";
+
+            jxsslxx(0);  //刷新税率列表
+
+            $("#txtszlx").val('收入');
+            $("#lblMsg1").val('');
+            //$("#txtszf").val('');
+            $("#txtszje").val('');
+            //$("#txtszrq").val('');
+            $("#txtszbz").val('');
+            $("#txtszse").val('');
+            var jxssd = $("#txtjxssd").val();
+            $("#txtszsl").val(jxssd);
+            $("#txtszismodify").val('');
+            $.ajax({
+                type: 'POST',
+                url: "/Home/newguid",
+                data: {},
+                dataType: "text",
+                success: function (sesponseTest) {
+                    $("#txtszid").val(sesponseTest);
+                    popupDiv('popSZ')
+                }
+            });
+        });
+    });
+    //预计支出新增
+    $(document).ready(function () {
+        $("#butnewyjsz2").click(function () {
+            var a1 = document.getElementById("lblsz");
+            a1.innerHTML = "预算支出";
+            var a2 = document.getElementById("lblszf");
+            a2.innerHTML = "收款方　　　";
+            var a3 = document.getElementById("lblszje");
+            a3.innerHTML = "预算支出金额";
+            var a4 = document.getElementById("lblszrq");
+            a4.innerHTML = "预算付款日期";
+            var a5 = document.getElementById("lblszse");
+            a5.innerHTML = "进项税额　　";
+            var a6 = document.getElementById("lblszsl");
+            a6.innerHTML = "进项税率　　";
+            var a7 = document.getElementById("lblszfpzl");
+            a7.innerHTML = "进项发票种类";
+
+            jxsslxx(1);  //刷新税率列表
+
+            $("#txtszlx").val('支出');
+            $("#lblMsg1").val('');
+            //$("#txtszf").val('');
+            $("#txtszje").val('');
+            //$("#txtszrq").val('');
+            $("#txtszse").val('');
+            var xxssd = $("#txtxxssd").val();
+            $("#txtszsl").val(xxssd);
+            $("#txtszbz").val('');
+            $("#txtszismodify").val('');
+            $.ajax({
+                type: 'POST',
+                url: "/Home/newguid",
+                data: {},
+                dataType: "text",
+                success: function (sesponseTest) {
+                    $("#txtszid").val(sesponseTest);
+                    popupDiv('popSZ')
+                }
+            });
+        });
+    });
+    //内部转账新增
+    $(document).ready(function () {
+        $("#butnewnbzz").click(function () {
+            $("#lblMsg2").val('');
+            $("#txtzzdx").val('');
+            $("#txtzzje").val('');
+            $("#txtzzbl").val('');
+            $("#txtzzbz").val('');
+            $("#txtzzismodify").val('');
+            $.ajax({
+                type: 'POST',
+                url: "/Home/newguid",
+                data: {},
+                dataType: "text",
+                success: function (sesponseTest) {
+                    $("#txtzzid").val(sesponseTest);
+
+                    var sums=getyssr();
+                    $("#txtsumyjsr").val(sums);  //计算预算收入总和，备用
+                    popupDiv('popZZ')
+                }
+            });
+        });
+    });
+    //应交税额新增
+    $(document).ready(function () {
+        $("#butnewfp").click(function () {
+            $("#lblMsg3").val('');
+            $("#txtfpspf").val('');
+            $("#txtfpfpzl").val('');
+            $("#txtfpysse").val('');
+            $("#txtfpsd").val('');
+            $("#txtfpbz").val('');
+            $("#txtfpismodify").val('');
+            $.ajax({
+                type: 'POST',
+                url: "/Home/newguid",
+                data: {},
+                dataType: "text",
+                success: function (sesponseTest) {
+                    $("#txtfpid").val(sesponseTest);
+                    popupDiv('popFP')
+                }
+            });
+        });
+    });
+    
+
+    //预计收支修改
+    function modifySZ(sz, sid, szlx, szf, szje, szrq, szbz, szse, szsl, szfpzl) {
+        var f1 = "收入";
+        var f2 = "收款";
+        var f3 = "销项";
+        var f4 = "付款";
+        if (sz == 1)
+        {
+            f1 = "支出";
+            f2 = "付款";
+            f3 = "进项";
+            f4 = "收款";
+        }
+        var a1 = document.getElementById("lblsz");
+        a1.innerHTML = "预算" + f1;
+        var a2 = document.getElementById("lblszf");
+        a2.innerHTML = f4 + "方　　　";
+        var a3 = document.getElementById("lblszje");
+        a3.innerHTML = "预算" + f1 + "金额";
+        var a4 = document.getElementById("lblszrq");
+        a4.innerHTML = "预算" + f2 + "日期";
+        var a5 = document.getElementById("lblszse");
+        a5.innerHTML = f3 + "税额　　";
+        var a6 = document.getElementById("lblszsl");
+        a6.innerHTML = f3 + "税率　　";
+        var a7 = document.getElementById("lblszfpzl");
+        a7.innerHTML = f3 + "发票种类";
+
+        jxsslxx(sz);  //刷新税率列表
+
+        $("#txtszid").val(sid);
+        $("#txtszlx").val(szlx);
+        $("#txtszf").val(szf);
+        $("#txtszje").val(szje);
+        $("#txtszrq").val(szrq);
+        $("#txtszbz").val(szbz);
+        $("#txtszse").val(szse);
+        $("#txtszsl").val(szsl);
+        $("#txtszfpzl").val(szfpzl);
+        $("#txtszismodify").val('1');
+        popupDiv('popSZ');
+
+        //$("#txtszsl").val(szsl);   //要写到popupDiv后面
+        //alert(szsl);
+    }
+    //内部转账修改
+    function modifyZZ(sid, zzdx, zzje, zzbl, zzbz)
+    {
+        $("#txtzzid").val(sid);
+        $("#txtzzdx").val(zzdx);
+        $("#txtzzje").val(zzje);
+        $("#txtzzbl").val(zzbl);
+        $("#txtzzbz").val(zzbz);
+        $("#txtzzismodify").val('1');
+        popupDiv('popZZ');
+    }
+    //发票修改
+    function modifyFP(sid, spf, fpzl, ysse, sd, bz)
+    {
+        $("#txtfpid").val(sid);
+        $("#txtfpspf").val(spf);
+        $("#txtfpfpzl").val(fpzl);
+        $("#txtfpysse").val(ysse);
+        $("#txtfpsd").val(sd);
+        $("#txtfpbz").val(bz);
+        $("#txtfpismodify").val('1');
+        popupDiv('popFP');
+    }
+
+
+
+
+    //收支保存
+    $(document).ready(function () {
+        $("#butSzbc").click(function () {
+            var szlx = $("#txtszlx").val();
+            if (szlx == "" || undefined || null) {
+                $("#lblMsg1").val('未知的预算类型（收入/支出）。');
+                return false;
+            }
+
+            var szf = $("#txtszf").val();
+            if (szf == "" || undefined || null) {
+                $("#lblMsg1").val('请输入付款/收款方。');
+                return false;
+            }
+            var szje = $("#txtszje").val();
+            if (szje == "" || undefined || null) {
+                $("#lblMsg1").val('请输入金额。');
+                return false;
+            }
+            var szrq = $("#txtszrq").val();
+            if (szrq == "" || undefined || null) {
+                $("#lblMsg1").val('请输入日期。');
+                return false;
+            }
+            var szbz = $("#txtszbz").val();
+            if (szbz == "" || undefined || null) {
+                szbz = "";
+            }
+            var szlx1 = $("#txtszlx1").val();
+            if (szlx1 == "" || undefined || null) {
+                szlx1 = "";
+            }
+            var szse = $("#txtszse").val();
+            if (szse == "" || undefined || null) {
+                szse = "0";
+            }
+            var szsl = $("#txtszsl").val();
+            if (szsl == "" || undefined || null) {
+                szsl = "0";
+            }
+            var szfpzl = $("#txtszfpzl").val();
+            if (szfpzl == "" || undefined || null) {
+                szfpzl = "";
+            }
+            var sid = $("#txtszid").val();
+            var sjzid = $("#txtjzid").val();
+            var ismodify = $("#txtszismodify").val();
+
+            $.ajax({
+                type: 'POST',
+                url: "/Main/SaveSz",
+                data: {
+                    savetodb: true,
+                    tid: sid,
+                    tjzid: sjzid,
+                    szlx: szlx,
+                    szf: szf,
+                    szje: szje,
+                    szrq: szrq,
+                    szbz: szbz,
+                    szlx1: szlx1,
+                    szse: szse,
+                    szsl: szsl,
+                    szfpzl: szfpzl
+                },
+                dataType: "json",
+                success: function (sesponseTest) {
+                    switch (sesponseTest) {
+                        case 300001:
+                            $("#lblMsg1").val('未知的预算记录，不能保存收入/支出。');
+                            return false;
+                        case 300005:
+                            $("#lblMsg1").val('不能保存收入/支出信息到数据库。');
+                            return false;
+                        default:
+                            hideDiv('popSZ');
+                            if (ismodify != "1") {
+                                addrowSz(szlx, sid, szf, szje, szrq, szbz, szlx1, szse, szsl);
+                            }
+                            break;
+                    }
+                    
+                }
+            });
+        });
+    });
+    //内部转账保存
+    $(document).ready(function () {
+        $("#butZzbc").click(function () {
+            var zzdx = $("#txtzzdx").val();
+            if (zzdx == "" || undefined || null) {
+                $("#lblMsg2").val('未知的转账对象。');
+                return false;
+            }
+            var zzje = $("#txtzzje").val();
+            if (zzje == "" || undefined || null) {
+                $("#lblMsg2").val('请输入转账金额。');
+                return false;
+            }
+            var sums = $("#txtsumyjsr").val();
+            if (sums == "" || undefined || null) {
+                sums = "";
+            }
+            if(parseFloat(zzje)>parseFloat(sums))
+            {
+                //$("#lblMsg2").val('转账金额不能大于预算收入。');
+                //return false;
+            }
+
+            var zzbl = $("#txtzzbl").val();
+            if (zzbl == "" || undefined || null) {
+                zzbl = "";
+            }
+            var zzbz = $("#txtzzbz").val();
+            if (zzbz == "" || undefined || null) {
+                zzbz = "";
+            }
+            var sid = $("#txtzzid").val();
+            var sjzid = $("#txtjzid").val();
+            var ismodify = $("#txtzzismodify").val();
+
+            $.ajax({
+                type: 'POST',
+                url: "/Main/SaveZz",
+                data: {
+                    savetodb: true,
+                    tid: sid,
+                    tjzid: sjzid,
+                    zzdx: zzdx,
+                    zzje: zzje,
+                    zzbl: zzbl,
+                    zzbz: zzbz
+                },
+                dataType: "json",
+                success: function (sesponseTest) {
+                    switch (sesponseTest) {
+                        case 300001:
+                            $("#lblMsg2").val('未知的预算记录，不能保存内部转账。');
+                            return false;
+                        case 300005:
+                            $("#lblMsg2").val('不能保存内部转账信息到数据库。');
+                            return false;
+                        default:
+                            hideDiv('popZZ');
+                            if (ismodify != "1") {
+                                addrowZz(sid, zzdx, zzje, zzbl, zzbz);
+                            }
+                            break;
+                    }
+
+                }
+            });
+        });
+    });
+    //收支发票保存
+    $(document).ready(function () {
+        $("#butFpbc").click(function () {
+            var spf = $("#txtfpspf").val();
+            if (spf == "" || undefined || null) {
+                $("#lblMsg3").val('未知的收票方。');
+                return false;
+            }
+            var fpzl = $("#txtfpfpzl").val();
+            if (fpzl == "" || undefined || null) {
+                $("#lblMsg3").val('请输入发票种类。');
+                return false;
+            }
+            var ysse = $("#txtfpysse").val();
+            if (ysse == "" || undefined || null) {
+                $("#lblMsg3").val('请输入应收税额。');
+                return false;
+            }
+            var sd = $("#txtfpsd").val();
+            if (sd == "" || undefined || null) {
+                $("#lblMsg3").val('请输入税点。');
+                return false;
+            }
+            var fpbz = $("#txtfpbz").val();
+            if (fpbz == "" || undefined || null) {
+                fpbz = "";
+            }
+            var sid = $("#txtfpid").val();
+            var sjzid = $("#txtjzid").val();
+            var ismodify = $("#txtfpismodify").val();
+
+            $.ajax({
+                type: 'POST',
+                url: "/Main/SaveFp",
+                data: {
+                    savetodb: true,
+                    tid: sid,
+                    tjzid: sjzid,
+                    spf: spf,
+                    fpzl: fpzl,
+                    ysse: ysse,
+                    sd: sd,
+                    fpbz: fpbz
+                },
+                dataType: "json",
+                success: function (sesponseTest) {
+                    switch (sesponseTest) {
+                        case 300001:
+                            $("#lblMsg3").val('未知的预算记录，不能保存应交税额');
+                            return false;
+                        case 300005:
+                            $("#lblMsg3").val('不能保存应交税额信息到数据库。');
+                            return false;
+                        default:
+                            hideDiv('popFP');
+                            if (ismodify != "1") {
+                                addrowFp(sid, spf, fpzl, ysse, sd, fpbz);
+                            }
+                            break;
+                    }
+
+                }
+            });
+        });
+    });
+
+    //添加附件
+    function fujian() {
+        var s = "/Main/StepUpfiles";
+        window.open(s, '_blank');
+
+        //window.location.href = "StepUpfiles";
+    }
+
+    //固定预算/项目预算
+    var gl_lx = $("#txtgl_lx").val();
+    if (gl_lx == "" || undefined || null) {
+        gl_lx = "0";
+    }
+    if(gl_lx == "0")
+    {
+        var tr_nbzz = document.getElementById('tr_nbzz');
+        tr_nbzz.style.display = 'none';
+        var tr_yjse = document.getElementById('tr_yjse');
+        tr_yjse.style.display = 'none';
+        var tr_ywlx = document.getElementById('tr_ywlx');
+        tr_ywlx.style.display = 'none';
+    }
+    var tmp23 = $("#txtFatherID").val();   //子预算项目没内部转账
+    if (tmp23 == "" || undefined || null) {
+        tmp23 = "";
+    }
+    if(tmp23!="")
+    {
+        var tr_nbzz1 = document.getElementById('tr_nbzz');
+        tr_nbzz1.style.display = 'none';
+    }
+
+
+    function songshen() {
+        var b1 = confirm("确认填写完毕立即送交审批？");
+        if (b1) {
+            var s1 = $("#txtjzid").val();
+            if (s1 == "" || undefined || null) {
+                alert('发生错误，未知的预算。');
+                return false;
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: "/Main/ApproveStaticApply",
+                data: {
+                    id: s1
+                },
+                dataType: "text",
+                success: function (sesponseTest) {
+                    switch (sesponseTest) {
+                        case "400001":
+                            alert('错误，未知的记录。');
+                            return false;
+                        case "400002":
+                            alert('送审失败。');
+                            return false;
+                        default:
+                            //alert('送审成功。');   //这句不会显示，有时间再做个div显示消息
+                            //window.location.href = "/Home/Index";
+
+                            popupDiv('popMSG')
+                            return true;
+                    }
+                }
+            });
+        }
+    }
+
+    function getyssr()  //获取预算收入
+    {
+        var sums = 0.00;
+        var tb = document.getElementById("tableyjsr");
+        var rows = tb.rows;
+        for (var i = 3; i < rows.length; i++) {   //注意是从第3行开始
+            try {
+                var cells = rows[i].cells;
+                sums = sums + parseFloat(cells[2].innerHTML.replace('¥', '').replace(',', ''));
+            }
+            catch (err) { }
+        }
+        return sums;
+    }
+    function jisuanzz(type)
+    {
+        var sums = $("#txtsumyjsr").val();
+        if (sums == "" || undefined || null) {
+            sums = 0.00;
+        }
+        var zzje = $("#txtzzje").val();
+        if (zzje == "" || undefined || null) {
+            zzje = 0.00;
+        }
+        var zzbl = $("#txtzzbl").val();
+        if (zzbl == "" || undefined || null) {
+            zzbl = 0.00;
+        }
+
+        var a = 0.00;
+        if (type == 0) {
+            a = Math.round(zzje / sums * 10000) / 100.00;
+            $("#txtzzbl").val(a.toFixed(2));
+            //$("#txtzzje").val(zzje.toFixed(2));
+            return;
+        }
+        if (type == 1) {            
+            a = Math.round(sums * zzbl * 0.01 / 1.00);
+            $("#txtzzje").val(a.toFixed(2));
+            //$("#txtzzbl").val(zzbl.toFixed(2));
+            return;
+        }
+    }
+
+    //增值税税点
+    function zzssd() {
+        var sm = $("#txtfpfpzl").val();
+        if (sm == "" || undefined || null) {
+            sm = "";
+        }
+
+        var obj = document.getElementById("txtfpsd")
+        //var sd = obj.value;
+        //if (sd == "" || (typeof (sd) == "undefined") || undefined || null) {
+        //    sd = "";
+        //}
+        //if (sd == "") {
+        if (sm == '增值税普通发票') {
+            obj.value = $("#txtzzsptfpsd").val();
+        }
+        else {
+            obj.value = $("#txtzzszyfpsd").val();
+        }
+        //}
+
+    }
+
+    //用户选择
+    function configDiv_Yh(div_id) {
+        var chkObjs = "";
+        var obj = document.getElementsByName("chkry")
+        for (var i = 0; i < obj.length; i++) { //遍历Radio 
+            if (obj[i].checked) {
+                chkObjs = chkObjs + " " + obj[i].value;
+            }
+        }
+        chkObjs = chkObjs.trim();
+        $("#txtysxs").val(chkObjs);
+
+        hideDiv(div_id);
+    }
+
+    function shuaxin() {
+        //window.location.replace(window.location.href);
+        window.location.reload();
+    }
+
+    //删除
+    function shanchuys()
+    {
+        var b1 = confirm("确认要删除该预算？");
+        if (b1) {
+            var s1 = $("#txtjzid").val();
+            if (s1 == "" || undefined || null) {
+                alert('发生错误，未知的预算。');
+                return false;
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: "/Main/DeleteStaticApply",
+                data: {
+                    id: s1
+                },
+                dataType: "text",
+                success: function (sesponseTest) {
+                    switch (sesponseTest) {
+                        case "400001":
+                            alert('错误，未知的记录。');
+                            return false;
+                        case "400002":
+                            alert('删除失败。');
+                            return false;
+                        default:
+                            alert('已删除该预算。');
+                            return true;
+                    }
+                }
+            });
+        }
+    }
+
+    //计算收支税额
+    function shouzhishuie() {
+        var je = $("#txtszje").val();
+        if (je == "" || undefined || null) {
+            je = 0.00;
+        }
+        var sl = $("#txtszsl").val();
+        if (sl == "" || undefined || null) {
+            sl = 0.00;
+        }
+        var a = 0.00;
+        //a = Math.round(je * sl / (1.00 + sl));
+        a = accDiv(accMul(je, sl), accAdd(1.00, sl));
+        $("#txtszse").val(a.toFixed(2));
+    }
+
+    //进销税税率（应收应付税率）选项
+    function jxsslxx(type)
+    {
+        var objSelectet = document.getElementById("txtszsl");
+
+        var ss = "";
+        if (type == 0)
+        {
+            ss = $("#txtjxssd").val(); //进项税率选择项
+        }
+        else
+        {
+            ss = $("#txtxxssd").val(); //销项税率选择项
+        }
+        
+        //从后面向前面删除
+        for (var i = objSelectet.options.length - 1 ; i >= 0 ; i--) {
+            objSelectet.options[i] = null;
+        }
+
+        var objOption = document.createElement("OPTION");
+        objOption.text = "";
+        objOption.value = "";
+        objSelectet.options.add(objOption);
+
+        var sls = new Array();
+        sls = ss.split(" ");
+        for (var i = 0; i < sls.length ; i++) {
+            if (sls[i].trim() != "") {
+                objOption = document.createElement("OPTION");
+                objOption.text = sls[i];
+                objOption.value = sls[i];
+                objSelectet.options.add(objOption);
+            }
+        }
+
+    }
+
+    
+
+    function dayin() {
+        var a = document.getElementById('txtjzid');
+        window.open("Printformvisa?tid=" + a.value);
+    }
+
+    function guanbiMSG()
+    {
+        window.location.href = "/Home/Index";
+    }
+
+    //function addEvidence(sid) {
+    //    var s = "../../Apply/AddEvidence?sID=" + sid;
+    //    window.location = s;
+    //}
+
+    //$("#butSxcllb").click(function () {
+    //    $("#cllb2").load("/Apply/Material", { "sID": $("#txtjzid").val() }, function () {
+    //        //alert("提交成功");
+    //    });
+    //});
+
+    document.getElementById("worktable").style.height = document.body.clientHeight + "px";
+
+    $("#txtfj").load("Material", { "sID": $("#txtjzid").val(), "viewonly": '0' }).show();   //刷新附件列表
+
+
+</script>
+
+

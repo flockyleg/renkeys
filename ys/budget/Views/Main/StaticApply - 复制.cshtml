@@ -1,0 +1,556 @@
+﻿@using applyvisa.Models;
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "固定预算申请";
+
+    var cbzxs = ViewBag.cbzxs as List<cls成本中心>;
+    var acc_yusuan = TempData["acc_yusuan"] as cls预算单;
+    int i = 0;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+
+    <style>
+        p.gaozhititle {
+            font-size: 18px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: black;
+            text-decoration: none;
+        }
+
+        #countrycolor {
+            color: #FF7F00;
+            text-wrap: none;
+        }
+
+        p.xingming {
+            font-size: 15px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: white;
+            background-color: #280581;
+            height: 35px;
+            vertical-align: middle;
+            display: block;
+            line-height: 35px;
+            text-align: left;
+        }
+
+        p.xiangqing {
+            font-size: 13px;
+            /*font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;*/
+            color: black;
+            background-color: #d6ddfb;
+            height: 100%;
+        }
+
+        .parent {
+            width: 100%;
+            height: 230px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .children {
+            display: inline-block;
+            width: 150px;
+            height: 150px;
+        }
+
+        .button {
+            font-size: 16px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: expanded;
+            color: #333333;
+        }
+
+        * + html .children {
+            display: inline;
+            zoom: 1;
+        }
+
+        * html .children {
+            display: inline;
+            zoom: 1;
+        }
+    </style>
+    <style type="text/css">
+        .pop-box {
+            /*弹出窗口后，弹出的DIV采用此CSS，保证置于最上层
+          z-index控制Z轴的坐标，数值越大，离用户越近
+        */
+            z-index: 9999999; /*这个数值要足够大，才能够显示在最上层*/
+            margin-bottom: 3px;
+            display: none;
+            position: absolute;
+        }
+
+        #bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            /*弹出窗口后，添加遮罩层，采用此CSS，将该层置于弹出DIV和页面层之间
+          z-index控制Z轴的坐标，数值越大，离用户越近  rgba(72, 74, 68, 0.46)
+        */
+            z-index: 1001;
+            background-color: #cfcdcd;
+            -moz-opacity: 0.7;
+            opacity: .70;
+            filter: alpha(opacity = 70);
+        }
+
+        td.style1 {
+            background-color: lightblue;
+            text-align: center;
+            color: gray;
+        }
+    </style>
+    <script type="text/javascript">
+        /*显示DIV*/
+        function popupDiv(div_id) {
+            // 获取传入的DIV
+            var $div_obj = $("#" + div_id);
+            // 计算机屏幕高度
+            var windowWidth = $(window).width();
+            // 计算机屏幕长度
+            var windowHeight = $(window).height();
+            // 取得传入DIV的高度
+            var popupHeight = $div_obj.height();
+            // 取得传入DIV的长度
+            var popupWidth = $div_obj.width();
+
+            var documentWidth = $(document).width();
+            var documentHeight = $(document).height();
+
+            $("<div id='bg'></div>").width(documentWidth * 0.99)
+                    .height(documentHeight * 0.99).click(function () {
+                        //hideDiv(div_id);
+                    }).appendTo("body").fadeIn(200);
+
+            var left1 = windowWidth / 2 - popupWidth / 2;
+            var top1 = windowHeight / 2 - popupHeight / 2;
+            if (left1 < 0) left1 = 0;
+            if (top1 < 0) top1 = 0;
+            if (left1 < $(document).scrollLeft()) left1 = $(document).scrollLeft();
+            if (top1 < $(document).scrollTop()) top1 = $(document).scrollTop();
+            top1 = $(document).scrollTop() - 30;   //直接靠上对齐
+            $div_obj.css({
+                "position": "absloute"
+            }).animate({
+                left: left1,
+                top: top1,
+                opacity: "show"
+            }, "slow");
+        }
+
+        /*隐藏DIV*/
+        function hideDiv(div_id) {
+            $("#bg").remove();
+            $("#" + div_id).animate({
+                left: 0,
+                top: 0,
+                opacity: "hide"
+            }, "slow");
+        }
+
+        function shouzhixx(sid, szlx, rq, jdf, je, bz) {
+            var s1 = '付款方';
+            var s2 = 'tableyjsr';
+            if (szlx == "支出") {
+                s1 = '收款方';
+                s2 = 'tableyjzc';
+            }
+
+            var str1 = "";
+            str1 = "&nbsp;日期：" + rq + '&nbsp;' + s1 + '：' + jdf + '&nbsp;金额：' + je + '&nbsp;备注：' + bz + '&nbsp';
+            str1 = str1 + "　　<button class='btn btn-primary' type='button' onclick=\"ysszdel(\'" + sid + "\','" + s2 + "');\">　删除　</button>";
+            str1 = str1 + "<br>";
+            return str1;
+        }
+        function addrow(szlx, sqrid, htmlstr) {
+            var s2 = 'tableyjsr';
+            if (szlx == "支出") {
+                s2 = 'tableyjzc';
+            }
+
+            //获取table
+            var tab = document.getElementById(s2);
+            //创建元素
+            var tr = document.createElement("tr"); tr.id = sqrid; tr.style = "width:100%";
+            var td1 = document.createElement("td"); td1.id = GUID(); td1.style = "border-top: white solid 2px; width: 100%;";
+            tr.appendChild(td1);
+            tab.appendChild(tr);
+
+            var str1 = "<p class='xiangqing'>" + htmlstr + "</p>";
+            td1.innerHTML = str1;
+
+        }
+
+
+        //生成随机GUID
+        function GUID() {
+            var G1 = (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1) + (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+            var G2 = (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1) + (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+            return (G1 + G2);
+        }        
+        function delrow(obj) {
+            var trId = obj.parentNode.parentNode.id;
+            //alert(trId);
+            var trObj = document.getElementById(trId);
+            tableSx.removeChild(trObj);
+        }
+        function deletetr(tdobject) {
+            var td = $(tdobject);
+            td.parents("tr").remove();
+        }
+    </script>
+</head>
+
+<body style="background-color: #2A293B;">
+
+    <div id="popSZ" class="pop-box">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popSZ');">×</button>
+                    <h4 id="lblsz" class="modal-title">预计</h4><input id="txtszlx" type="hidden">
+                </div>
+                <div class="panel-body" style="height: 100%;">
+                    <div class="parent" style="text-align: left; height: auto;">
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszf" style="border:none;background-color:white;">收支方　　　</span>
+                            <input id="txtszf" type="text" class="form-control">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszje" style="border:none;background-color:white;">预算收支金额</span>
+                            <input id="txtszje" type="text" class="form-control">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszrq" style="border:none;background-color:white;">预算收支日期</span>
+                            <input id="txtszrq" type="date" class="form-control">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszbz" style="border:none;background-color:white;">备注　　　　</span>
+                            <input id="txtszbz" type="text" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input id="lblMsg1" type="text" readonly="readonly" style="border-style:none;color:red;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popSZ');">　取　消　</button>
+                    <button id="butSzbc" type="button" class="btn btn-primary">　确　定　</button>
+                    <input type="hidden" id="txtsqrid">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" id="txtjzid" value="@acc_yusuan.ID.ToString()">
+
+    <table id="worktable" style="width: 100%; background-color: white; min-height: 400px;">
+        <tr>
+            <td style="height:100%;vertical-align:top;">
+                <div class="divbackground">
+                    <li class="list-group-item" style="text-align:center;">
+                        <p class="gaozhititle">预 算 申 请</p>
+                    </li>
+
+                    <li class="list-group-item">
+                        <div class="input-group">
+                            <span class="input-group-addon">预算编号　　</span>
+                            <input id="txtysbh" type="text" class="form-control" readonly="readonly" style="z-index:0;">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">预算名称　　</span>
+                            <input id="txtysmc" type="text" class="form-control" style="z-index:0;">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon">成本中心编号</span>
+                            <input id="txtcbzxbh" type="text" class="form-control" style="z-index:0;">
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                    @{                                        
+                                        for (i = 0; i < cbzxs.Count; i++)
+                                        {
+                                            <li><a onclick="comboitemclick('txtcbzxbh', '@cbzxs[i].成本中心编号');">@cbzxs[i].成本中心编号</a></li>
+                                        }
+                                     }
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">预算说明　　</span>
+                            <textarea id="txtyssm" class="form-control" style="z-index:0;height:100px;width:100%;"></textarea>
+                        </div>
+                    </li>
+                    <li class="list-group-item" style="text-align:center;">
+                        <button class="btn btn-primary" type="button" id="butnewyjsz1">添加预计收入</button> 
+                    </li>
+                    <li class="list-group-item">
+                        <table id="tableyjsr" style="width:100%;border:none;">
+                            
+
+                        </table>
+                    </li>
+                    <li class="list-group-item" style="text-align:center;">
+                        <button class="btn btn-primary" type="button" id="butnewyjsz2">添加预计支出</button>
+                    </li>
+                    <li class="list-group-item">
+                        <table id="tableyjzc" style="width:100%;border:none;">
+
+
+                        </table>
+                    </li>
+
+                    <li class="list-group-item">
+                        <table style="width:100%;height:60px;">
+                            <tr style="width:100%">
+                                <td style="text-align: right; "><button class="btn btn-primary" type="button" style="width:100px;" onclick="quxiao();">取　消</button></td>
+                                <td style="width: 180px; text-align: center; "></td>
+                                <td style="text-align: left; "><button class="btn btn-primary" type="button" style="width:100px;" onclick="baocun();">保　存</button></td>
+                            </tr>
+                        </table>
+                    </li>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
+
+
+<script type="text/javascript" src="~/Others/js/alert.js"></script>
+<script type="text/javascript" src="~/Others/js/confirm.js"></script>
+<script type="text/javascript" language="javascript">
+    function baocun() {
+        var s1 = $("#txtysmc").val();
+        if (s1 == "" || undefined || null) {
+            alert('请输入预算名称。');
+            return false;
+        }
+        var s2 = $("#txtcbzxbh").val();
+        if (s2 == "" || undefined || null) {
+            alert('请输入成本中心编号。');
+            return false;
+        }
+        var s3 = $("#txtysbh").val();
+        if (s3 == "" || undefined || null) {
+            s3 = "";
+        }
+        var s4 = $("#txtyssm").val();
+        if (s4 == "" || undefined || null) {
+            s4 = "";
+        }
+
+        //var tab = document.getElementById("tableyjsr");
+        //if (tab.rows.length < 1) {
+        //    alert('请输入申请人。');
+        //    return false;
+        //}
+
+        $.ajax({
+            type: 'POST',
+            url: "/Main/SaveNewStaticApply",
+            data: {
+                tysbh: s3,
+                tysmc: s1,
+                tcbzxbh: s2,
+                tyssm: s4
+            },
+            dataType: "text",
+            success: function (sesponseTest) {
+                switch (sesponseTest) {
+                    case 400001:
+                    case 400002:
+                        alert('保存失败。');
+                        break;
+                    default:
+                        //转到显示记录界面
+                        //alert('保存成功。');
+                        window.location = "StaticApplyEdit";
+                        break;
+                }
+            }
+        });
+    }
+
+    function lclose(strid) {
+        var ad = document.getElementById(strid)
+        ad.style.display = (ad.style.display == 'none') ? '' : 'none';
+    }
+
+    function quxiao() {
+        window.location.href = "/Home/Index";
+    }
+
+    function comboitemclick(txtid, txtvalue) {
+        var a = document.getElementById(txtid)
+        a.value = txtvalue;
+    }
+
+    function ysszdel(sid, tablesz) {
+        var b1 = confirm("确认要删除该预计收入/支出？");
+        if (b1) {
+            $.ajax({
+                type: 'POST',
+                url: "/Main/DelSz",
+                data: {
+                    savetodb: false,
+                    tid: sid
+                },
+                dataType: "text",
+                success: function (sesponseTest) {
+                    switch (sesponseTest) {
+                        case 300001:
+                        case 300002:
+                        case 300005:
+                            break;
+                        default:
+                            var tab = document.getElementById(tablesz);
+                            var trObj = document.getElementById(sid);
+                            tab.removeChild(trObj);
+                            break;
+                    }
+                }
+            });
+        }
+
+    }
+
+    $(document).ready(function () {
+        $("#butnewyjsz1").click(function () {            
+            var a1 = document.getElementById("lblsz");
+            a1.innerHTML = "预计收入";
+            var a2 = document.getElementById("lblszf");
+            a2.innerHTML = "收入方　　　";
+            var a3 = document.getElementById("lblszje");
+            a3.innerHTML = "预计收入金额";
+            var a4 = document.getElementById("lblszrq");
+            a4.innerHTML = "预计收款日期";
+            
+            $("#txtszlx").val('收入');
+            $("#lblMsg1").val('');
+            $("#txtszf").val('');
+            $("#txtszje").val('');
+            $("#txtszrq").val('');
+            $("#txtszbz").val('');
+            $.ajax({
+                type: 'POST',
+                url: "/Home/newguid",
+                data: {},
+                dataType: "text",
+                success: function (sesponseTest) {
+                    $("#txtsqrid").val(sesponseTest);
+                    popupDiv('popSZ')
+                }
+            });
+        });
+    });
+    $(document).ready(function () {
+        $("#butnewyjsz2").click(function () {
+            var a1 = document.getElementById("lblsz");
+            a1.innerHTML = "预计支出";
+            var a2 = document.getElementById("lblszf");
+            a2.innerHTML = "支出方　　　";
+            var a3 = document.getElementById("lblszje");
+            a3.innerHTML = "预计支出金额";
+            var a4 = document.getElementById("lblszrq");
+            a4.innerHTML = "预计付款日期";
+
+            $("#txtszlx").val('支出');
+            $("#lblMsg1").val('');
+            $("#txtszf").val('');
+            $("#txtszje").val('');
+            $("#txtszrq").val('');
+            $("#txtszbz").val('');
+            $.ajax({
+                type: 'POST',
+                url: "/Home/newguid",
+                data: {},
+                dataType: "text",
+                success: function (sesponseTest) {
+                    $("#txtsqrid").val(sesponseTest);
+                    popupDiv('popSZ')
+                }
+            });
+        });
+    });
+
+
+    $(document).ready(function () {
+        $("#butSzbc").click(function () {
+            var szlx = $("#txtszlx").val();
+            if (szlx == "" || undefined || null) {
+                $("#lblMsg1").val('未知的预算类型（收入/支出）。');
+                return false;
+            }
+            
+            var szf = $("#txtszf").val();
+            if (szf == "" || undefined || null) {
+                $("#lblMsg1").val('请输入收入/支出方。');
+                return false;
+            }
+            var szje = $("#txtszje").val();
+            if (szje == "" || undefined || null) {
+                $("#lblMsg1").val('请输入金额。');
+                return false;
+            }
+            var szrq = $("#txtszrq").val();
+            if (szrq == "" || undefined || null) {
+                $("#lblMsg1").val('请输入日期。');
+                return false;
+            }
+            var szbz = $("#txtszbz").val();
+            if (szbz == "" || undefined || null) {
+                szbz = "";
+            }
+            var sid = $("#txtsqrid").val();
+            var sjzid = $("#txtjzid").val();
+
+            $.ajax({
+                type: 'POST',
+                url: "/Main/SaveSz",
+                data: {
+                    savetodb: false,
+                    tid: sid,
+                    tjzid: sjzid,
+                    szlx: szlx,
+                    szf: szf,
+                    szje: szje,
+                    szrq: szrq,
+                    szbz: szbz
+                },
+                dataType: "json",
+                success: function (sesponseTest) {                    
+                    switch (sesponseTest) {
+                        case 300001:
+                            $("#lblMsg1").val('未知的预算记录，不能保存出入/支出。');
+                            return false;
+                        case 300005:
+                            $("#lblMsg1").val('不能保存出入/支出信息到数据库。');
+                            return false;
+                        default:
+                            hideDiv('popSZ');
+                            
+                            var newstr = shouzhixx(sid, szlx, szrq, szf, szje, szbz);
+                            
+                            addrow(szlx,sid, newstr);
+                            break;
+                    }
+
+                }
+            });
+        });
+    });
+
+    document.getElementById("worktable").style.height = document.body.clientHeight + "px";
+</script>
+
+

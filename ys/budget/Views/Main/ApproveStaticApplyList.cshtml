@@ -1,0 +1,722 @@
+﻿@using applyvisa.Models;
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "待审批预算清单";
+
+    int percount = 20;   //每页20行
+    int pagenum = 0;     //当前页码
+    int pagetotal = 0;   //总页数
+
+    string s1 = "";
+    string s2 = "";
+    string s3 = "";
+    string s4 = "";
+    List<cls预算单> lstsb = null;
+
+    try { pagenum = (int)ViewBag.pagenum; }
+    catch { }
+    try { pagetotal = (int)ViewBag.pagetotal; }
+    catch { }
+
+    try { s1 = (string)TempData["sbcx_t1"]; }
+    catch { }
+    try { s2 = (string)TempData["sbcx_t2"]; }
+    catch { }
+    try { s3 = (string)TempData["sbcx_t3"]; }
+    catch { }
+    try { s4 = (string)TempData["sbcx_t4"]; }
+    catch { }
+
+    try { lstsb = (List<cls预算单>)ViewBag.pagedata; }
+    catch { }
+    if (lstsb == null)
+    {
+        lstsb = new List<cls预算单>();
+    }
+    int i = 0;
+    string sdenglurenming = ViewBag.dlzx as string;
+
+    var wheresql = TempData["wheresql"] as string;
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+
+    <script type="text/javascript" src="~/Others/js/alert.js"></script>
+
+    <style>
+        #countrycolor {
+            color: #FF7F00;
+            text-wrap: none;
+        }
+
+        p.xingming {
+            font-size: 15px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: white;
+            background-color: #280581;
+            height: 35px;
+            vertical-align: middle;
+            display: block;
+            line-height: 35px;
+            text-align: left;
+        }
+
+        p.xiangqing {
+            font-size: 13px;
+            /*font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;*/
+            color: black;
+            background-color: #a3abcf;
+            height: 100%;
+        }
+
+        .parent {
+            width: 100%;
+            height: 230px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .children {
+            display: inline-block;
+            width: 150px;
+            height: 150px;
+        }
+
+        .button {
+            font-size: 16px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: expanded;
+            color: #333333;
+        }
+
+        * + html .children {
+            display: inline;
+            zoom: 1;
+        }
+
+        * html .children {
+            display: inline;
+            zoom: 1;
+        }
+
+        p.gaozhititle {
+            font-size: 18px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: black;
+            text-decoration: none;
+        }
+    </style>
+
+    <style type="text/css">
+        .pop-box {
+            /*弹出窗口后，弹出的DIV采用此CSS，保证置于最上层
+          z-index控制Z轴的坐标，数值越大，离用户越近
+        */
+            z-index: 9999999; /*这个数值要足够大，才能够显示在最上层*/
+            margin-bottom: 3px;
+            display: none;
+            position: absolute;
+        }
+
+        #bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            /*弹出窗口后，添加遮罩层，采用此CSS，将该层置于弹出DIV和页面层之间
+          z-index控制Z轴的坐标，数值越大，离用户越近  rgba(72, 74, 68, 0.46)
+        */
+            z-index: 1001;
+            background-color: #cfcdcd;
+            -moz-opacity: 0.7;
+            opacity: .70;
+            filter: alpha(opacity = 70);
+        }
+
+        td.style1 {
+            background-color: lightblue;
+            text-align: center;
+            color: gray;
+        }
+    </style>
+    <script type="text/javascript">
+        /*显示DIV*/
+        function popupDiv(div_id, banliid, shenqingren, ysleixing) {
+
+            var a = document.getElementById('txtbanliid')
+            a.value = banliid;            
+            var b = document.getElementById('txtshenqingren')
+            b.value = shenqingren;
+            var c = document.getElementById('txtysleixing')
+            c.value = ysleixing;
+
+            $("#txtcljg").val('');
+            $("#txtclyj").val('');            
+            
+
+            // 获取传入的DIV
+            var $div_obj = $("#" + div_id);
+            // 计算机屏幕高度
+            var windowWidth = $(window).width();
+            // 计算机屏幕长度
+            var windowHeight = $(window).height();
+            // 取得传入DIV的高度
+            var popupHeight = $div_obj.height();
+            // 取得传入DIV的长度
+            var popupWidth = $div_obj.width();
+
+            var documentWidth = $(document).width();
+            var documentHeight = $(document).height();
+
+            $("<div id='bg'></div>").width(documentWidth * 0.99)
+                    .height(documentHeight * 0.99).click(function () {
+                        //hideDiv(div_id);
+                    }).appendTo("body").fadeIn(200);
+
+            var left1 = windowWidth / 2 - popupWidth / 2;
+            var top1 = windowHeight / 2 - popupHeight / 2;
+            if (left1 < 0) left1 = 0;
+            if (top1 < 0) top1 = 0;
+            if (left1 < $(document).scrollLeft()) left1 = $(document).scrollLeft();
+            if (top1 < $(document).scrollTop()) top1 = $(document).scrollTop();
+            top1 = $(document).scrollTop() - 30;   //直接靠上对齐
+            $div_obj.css({
+                "position": "absloute"
+            }).animate({
+                left: left1,
+                top: top1,
+                opacity: "show"
+            }, "slow");
+        }
+
+        /*隐藏DIV*/
+        function hideDiv(div_id) {
+            $("#bg").remove();
+            $("#" + div_id).animate({
+                left: 0,
+                top: 0,
+                opacity: "hide"
+            }, "slow");
+        }
+
+        function configDiv_Yd(div_id) {
+            var b = $("#txtcljg").val();
+            if (b == "" || undefined || null) {
+                //alert('请输入处理结果。');
+                return false;
+            }
+
+            hideDiv(div_id);
+
+            var a = $("#txtbanliid").val();
+            var obj = document.getElementById(a)
+            obj.innerText = b;
+        }
+
+        function quedingCheck(div_id) {
+            var b = $("#txtcljg").val();
+            if (b == "" || undefined || null) {
+                //alert('请输入处理结果。');
+                $("#lblMsg1").val('请输入审批结果。');
+                return false;
+            }
+            return true;
+        }
+
+        $(document).ready(function () {            
+            $("#butChuli").click(function () {
+                var id = $("#txtbanliid").val();
+                if (id == "" || undefined || null) {
+                    $("#lblMsg1").val('未知的错误，记录不存在。');
+                    return false;
+                }
+                var clr = $("#txtclr").val();
+                if (clr == "" || undefined || null) {
+                    clr = "";
+                }
+                var cljg = $("#txtcljg").val();
+                if (cljg == "" || undefined || null) {
+                    $("#lblMsg1").val('请输入审批结果。');
+                    return false;
+                }
+                var clyj = $("#txtclyj").val();
+                if (clyj == "" || undefined || null) {
+                    clyj = "";
+                }
+                var shenqingren = $("#txtshenqingren").val();
+                if (shenqingren == "" || undefined || null) {
+                    shenqingren = "";
+                }
+                var ysleixing = $("#txtysleixing").val();
+                if (ysleixing == "" || undefined || null) { 
+                    ysleixing = "";
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: "/Main/HandleStaticApply",
+                    data: {
+                        xgID: id,
+                        xgyw: '预算审批',
+                        clr: clr,
+                        cljg: cljg,
+                        clyj: clyj,
+                        shenqingren: shenqingren,
+                        ysleixing: ysleixing
+                    },
+                    dataType: "json",
+                    success: function (sesponseTest) {
+                        switch (sesponseTest) {
+                            case 900001:
+                                //alert('a'+sesponseTest);
+                                return;
+                            case 900002:
+                                //alert('b' + sesponseTest);
+                                return;
+                            default:
+                                //alert('c' + sesponseTest);
+                                hideDiv('popXQ');
+
+                                var a = $("#txtbanliid").val();
+                                
+                                var sls = new Array();
+                                sls = a.split(" ");
+                                for (var i = 0; i < sls.length ; i++) {
+                                    sls[i] = sls[i].replace('chk_', '').trim();
+                                    if (sls[i] != "") {
+                                        var obj = document.getElementById(sls[i])
+                                        obj.innerText = "审批" + $("#txtcljg").val();
+
+                                        //if ((shenqingren == "批量审批") && (ysleixing == "批量审批")) {
+                                            var objchk = document.getElementById('chk_' + sls[i]);
+                                            objchk.checked = false;
+                                            objchk.disabled = true;
+                                        //}
+                                    }
+                                }
+                                //if ((shenqingren == "批量审批") && (ysleixing == "批量审批")) {
+                                    //清除所有选中
+                                    var chkall = document.getElementById('allboxs');
+                                    objchk.checked = false;
+                                    allcheck();
+                                //}
+                               
+                        }
+
+
+                    }
+                });
+            });
+        });
+
+    </script>
+
+</head>
+
+<body style="background-color: #2A293B;">
+    
+    @*<div id="popSQR" class="pop-box">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <input id="txtbanliid" type="hidden">
+
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popSQR');">×</button>
+                    <h4 id="myModalLabel" class="modal-title">预算审批</h4>
+                </div>
+                <div class="panel-body" style="height: 100%;">
+                    <div class="parent" style="text-align: left; height: auto;">
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">审批人　</span>
+                            <input id="txtclr" type="text" class="form-control" disabled="disabled" style="background-color:white;" value="@sdenglurenming">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">审批结果</span>
+                            <input id="txtcljg" type="text" class="form-control" placeholder="选择审批结果..">
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                    <li><a onclick="comboitemclick('txtcljg', '同意');">同意</a></li>
+                                    <li><a onclick="comboitemclick('txtcljg', '驳回');">驳回</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">审批意见</span>
+                            <textarea id="txtclyj" class="form-control" style="height:100px;width:100%;"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input id="lblMsg1" type="text" readonly="readonly" style="border-style:none;color:red;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popSQR');">取消</button>
+                    <button type="button" id="butChuli" class="btn btn-primary" onclick="quedingCheck('popSQR');">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+
+    <div id="popXQ" class="pop-box" style="width:840px;">
+        <div class="modal-dialog" style="width: 840px;">
+            <div class="modal-content" style="width: 840px;">
+
+                <input id="txtbanliid" type="hidden">
+                <input id="txtshenqingren" type="hidden">
+                <input id="txtysleixing" type="hidden">
+
+                <div class="modal-header" style="width: 838px; background-color: #97bad1;">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popXQ');">×</button>
+                    <input id="lblXqbt" type="text" readonly="readonly" style="z-index: 0; border: none; width: 400px; background-color: #97bad1;color:white;">
+                </div>
+                <div id="chuli" class="panel-body" style="background-color: #FDFDFD; ">
+                    <table style="width:800px;margin-left:auto;margin-right:auto;border:solid 1px lightgray;">
+                        <tr style="border-bottom: solid 1px lightgray;">
+                            <td style="width: 80px; border-right: solid 1px lightgray;">
+                                <span class="input-group-addon" style="border: none; background-color:white;">审 批 人</span>
+                            </td>
+                            <td style="width: 170px; border-right: solid 1px lightgray;">
+                                <input id="txtclr" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px;" value="@sdenglurenming">
+                            </td>
+                            <td style="width: 80px; border-right: solid 1px lightgray;">
+                                <span class="input-group-addon" style="border: none; background-color:white;">审批结果</span>
+                            </td>
+                            <td style="width: 170px;">
+                                <select id="txtcljg" style="width: 270px; height: 30px; margin-left: 5px; border: none; font-size: 13px; ">
+                                    <option value=""></option>
+                                    <option value="同意">同意</option>
+                                    <option value="驳回">驳回</option>
+                                </select>
+                            </td>
+                            <td style="width:20px;"></td>
+                        </tr>
+                        <tr style="border-bottom: solid 1px lightgray;">
+                            <td style="width: 80px; border-right: solid 1px lightgray;">
+                                <span class="input-group-addon" style="border: none; background-color:white;">审批意见</span>
+                            </td>
+                            <td colspan="3" style="width:auto;">
+                                <input id="txtclyj" type="text" style="width: 700px; height: 30px; margin-left: 5px; border: none; font-size: 13px;">
+                            </td>
+                            <td style="width:20px;"></td>
+                        </tr>
+                        <tr style="text-align:center;">
+                            <td colspan="5" style="width:auto;height:60px;">
+                                <input id="lblMsg1" type="text" readonly="readonly" style="border-style:none;color:red;"><br>
+                                <button type="button" id="butChuli" class="btn btn-primary" onclick="quedingCheck('popXQ');"> 确 定 </button>
+                            </td>
+                        </tr>
+                    </table>
+                     
+                </div>
+                <div id="ysxiangqing" class="panel-body" style="background-color: #FDFDFD; ">
+
+                </div>
+                <div class="modal-footer" style="background-color: #FDFDFD;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popXQ');">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <table id="worktable" style="width: 1024px; background-color: white; min-height: 400px; margin-right: auto; margin-left: auto;">
+        <tr>
+            <td style="height:50px;text-align:center;">
+                <li class="list-group-item">
+                    <br>
+                    <table style="width:100%;height:60px;">
+                        <tr style="width:100%">
+                            <td style="width: 100%; text-align: center; " colspan="4"><p class="gaozhititle">待审批的预算</p></td>
+                        </tr>
+                        <tr style="width:100%">
+                            <td style="width: auto; text-align: center;">
+                                <div class="input-group" style="top:10px;">
+                                    <input type="text" id="txtcxtj" class="form-control" placeholder="按预算名称、预算编号、成本编号、业务类型、申请人搜索...">
+                                    <span class="input-group-btn">
+                                        <button id="butCx" class="btn btn-default" type="button" onclick="shuaxin();">查询</button>
+                                    </span>
+                                </div>
+                            </td>
+                            <td style="width: 80px; text-align: center; ">
+                                <button id="butshuaxin1" class="btn btn-primary" type="button" style="width:80px;" onclick="shuaxin();">刷　新</button>
+                            </td>
+                            <td style="width: 80px; text-align: center; ">
+                                <input type="hidden" id="txtplcl">
+                                <button id="butplcl" class="btn btn-primary" type="button" style="width:80px;" disabled="disabled" onclick="piliangchuli();">批量审批</button>
+                            </td>
+                            <td style="width: 80px; text-align: center; ">
+                                <button id="butguanbi1" class="btn btn-primary" type="button" style="width:80px;" onclick="guanbi();">关　闭</button>
+                            </td>
+                        </tr>
+                    </table>
+                </li>
+            </td>
+        </tr>
+        <tr>
+            <td style="height:100%;vertical-align:top;">
+                <div class="divbackground">
+                    <li class="list-group-item">
+                        <table class="table table-hover" id="tblist">
+                            <thead>
+                                <tr>
+                                    <th style="width:5px;"><input id="allboxs" onclick="allcheck();" type="checkbox" /></th>
+                                    <th>序号</th>
+                                    <th>类型</th>
+                                    <th>预算编号</th>
+                                    <th>预算名称</th>
+                                    <th>成本中心编号</th>
+                                    <th>申请人</th>
+                                    <th>申请日期</th>
+                                    <th>预收</th>
+                                    <th>预支</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @{
+
+                                    for (i = 0; i < lstsb.Count; i++)
+                                    {
+                                        int xh = (pagenum - 1) * percount + i + 1;
+                                        string lx = "固定";
+                                        if (lstsb[i].类型 == 1)
+                                        {
+                                            lx = "项目";
+                                        }
+                                        <tr>
+                                            <td style="width:5px;"><input name="boxs" id="chk_@lstsb[i].ID" type="checkbox" onclick="HaveChecked();" /></td>
+                                            <td>@xh</td>
+                                            <td>@lx</td>
+                                            <td>@lstsb[i].预算编号</td>
+                                            <td>@lstsb[i].预算名称</td>
+                                            <td>@lstsb[i].成本中心编号</td>
+                                            <td>@lstsb[i].申请人</td>
+                                            <td>@lstsb[i].申请日期.ToString("yyyy-MM-dd")</td>
+                                            <td>@lstsb[i].管理_预算收入金额</td>
+                                            <td>@lstsb[i].管理_预算支出金额</td>
+                                            @*<td>@Html.ActionLink("详情", "StaticApplyView", new { id = lstsb[i].ID }, new { target = "_blank" }) | <a href="javascript:popupDiv('popSQR','@lstsb[i].ID');">审批</a></td>*@
+                                            @*<td><a href="javascript:showDetail('@lstsb[i].ID','@lstsb[i].类型');">详情</a> | <a href="javascript:popupDiv('popSQR','@lstsb[i].ID');">审批</a></td>*@
+                                            <td id="@lstsb[i].ID"><a href="javascript:showDetail('@lstsb[i].ID','@lstsb[i].类型','@lstsb[i].申请人','@lstsb[i].类型');">审批</a></td>
+                                        </tr>
+                                    }
+
+                                }
+
+                            </tbody>
+                        </table>
+
+
+                        <br>
+                        <input id="dqy" type="hidden" value="@pagenum"><input id="zys" type="hidden" value="@pagetotal">
+
+                        <table style="width:100%;height:60px;">
+                            <tr style="width:100%">
+                                <td></td>
+                                <td style="text-align: center; width:360px;">
+
+                                    <div class="input-group">
+                                        <span class="input-group-addon">共 @pagetotal 页 / 第</span>
+                                        <input id="txtdangqianye" type="text" class="form-control" style="text-align:center;" value="@pagenum">
+                                        <span class="input-group-addon">页</span>
+                                        <span class="input-group-btn">
+                                            <button id="butsyy" class="btn btn-default" type="button" onclick="rollto(-1);">﹤</button>
+                                        </span>
+                                        <span class="input-group-btn">
+                                            <button id="butxyy" class="btn btn-default" type="button" onclick="rollto(1);">﹥</button>
+                                        </span>
+                                        <span class="input-group-btn">
+                                            <button id="butxy" class="btn btn-default" type="button" onclick="rollto(0);">Go</button>
+                                        </span>
+
+                                        <span class="input-group-btn">
+                                            <button id="buttoexcel" class="btn btn-default" type="button" onclick="Export2Excel();">导出</button>
+                                        </span>
+                                    </div>
+                                    <input id="wheresql" type="hidden" value="@wheresql">
+
+
+                                </td>
+                                <td></td>
+                            </tr>
+                            <tr style="width:100%">
+                                <td></td>
+                                <td style="text-align: center; width:360px;">
+                                    <br>
+                                    <table style="width:100%;height:60px;">
+                                        <tr style="width:100%">
+                                            <td style="width: 50%; text-align: center; ">
+                                                <button id="butshuaxin2" class="btn btn-primary" type="button" style="width:100px;" onclick="shuaxin();">刷　新</button>
+                                            </td>
+                                            <td style="width: 50%; text-align: center; ">
+                                                <button id="butguanbi2" class="btn btn-primary" type="button" style="width:100px;" onclick="guanbi();">关　闭</button>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <br>
+                                </td>
+                                <td></td>
+                            </tr>
+                        </table>
+
+                    </li>
+
+
+
+                </div>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
+
+
+<script type="text/javascript" language="javascript">
+    
+    function guanbi() {
+        window.location.href = "/Home/Index";
+    }
+
+    function shuaxin() {
+        var cxtj = $("#txtcxtj").val();
+        if (cxtj == "" || undefined || null) {
+            cxtj = '';
+        }
+        var s = "../Main/ApproveStaticApplyList?p=1&cxtj=" + escape(cxtj);
+        window.location = s;
+    }
+
+    function rollto(intstep) {
+        var a1 = "1";
+        var a2 = "1";
+        var a = "1";
+        a1 = $("#dqy").val();
+        a2 = $("#zys").val();
+        a = $("#txtdangqianye").val();
+        if (a1 == "" || undefined || null) {
+            a1 = '1';
+        }
+        if (a2 == "" || undefined || null) {
+            a2 = '1';
+        }
+        if (a == "" || undefined || null) {
+            a = '1';
+        }
+        a = parseInt(a) + parseInt(intstep);
+        //if (parseInt(a1) > parseInt(a2)) {
+        //    a1 = a2;
+        //}
+        //if (parseInt(a) < parseInt(a1)) {
+        //    a = a1;
+        //}
+        //if (parseInt(a) > parseInt(a2)) {
+        //    a = a2;
+        //}
+
+
+        $("#txtdangqianye").val(a);
+
+        var cxtj = $("#txtcxtj").val();
+        if (cxtj == "" || undefined || null) {
+            cxtj = '';
+        }
+        var s = "../Main/ApproveStaticApplyList?p=" + a + "&cxtj=" + escape(cxtj);
+        window.location = s;
+    }
+
+    function comboitemclick(txtid, txtvalue) {
+        var a = document.getElementById(txtid)
+        a.value = txtvalue;
+    }
+
+    function showDetail(strid, strlx, shenqingren, ysleixing) {
+        $("#ysxiangqing").load("/Main/StaticApplyView", { "id": strid }, function () {
+            var cp = '固定';
+            if (strlx == '1') cp = '项目';
+            $("#lblXqbt").val(' ' + cp + '预算审批');
+            popupDiv('popXQ', strid, shenqingren, ysleixing);
+        });
+    }
+
+    function Export2Excel() {
+        var q = $("#wheresql").val();
+        if (q == "" || undefined || null) {
+            q = " where 1=2";
+        }
+        q = 'select * from V预算统计 ' + q;
+        q = escape(q);
+        var s = "../Main/Export2Excel?w=" + q;
+        window.location = s;
+    }
+
+    function allcheck() {
+        var nn = $("#allboxs").is(":checked"); //判断th中的checkbox是否被选中
+        if (nn == true) {
+            var namebox = $("input[name^='boxs']");  //获取name值为boxs的所有input
+            for (i = 0; i < namebox.length; i++) {
+                if (namebox[i].disabled == false) {
+                    namebox[i].checked = true;    //js操作选中checkbox
+                }
+            }
+        }
+        if (nn == false) {
+            var namebox = $("input[name^='boxs']");
+            for (i = 0; i < namebox.length; i++) {
+                if (namebox[i].disabled == false) {
+                    namebox[i].checked = false;
+                }
+            }
+        }
+        HaveChecked();
+    }
+
+    function HaveChecked() {
+        var s1 = "";
+        var Tabobj = $("#tblist");
+        var Check = $("table input[type=checkbox]:checked");//在table中找input下类型为checkbox属性为选中状态的数据
+        Check.each(function () {   //遍历
+            //var row = $(this).parent("td").parent("tr");//获取选中行
+            //var id = row.find("[name='Sid']").html();//获取name='Sid'的值
+            //var sname = row.find("[name='Sname']").html();
+            if (this.id != "allboxs") {
+                if (this.checked) {
+                    s1 = s1 + " " + this.id;
+                }
+            }
+        })
+        $("#txtplcl").val(s1);
+        if (s1 == "") {
+            $("#butplcl").attr("disabled", true);
+        }
+        else {
+            $("#butplcl").attr("disabled", false);
+        }
+    }
+
+    //批量处理
+    function piliangchuli()
+    {
+        var a = $("#txtplcl").val();
+        if (a == "" || undefined || null) {
+            a = '';
+        }
+        if (a == "") { return false; }
+
+        $("#lblXqbt").val(' ' + '批量预算审批');
+        popupDiv('popXQ', a, '批量审批', '批量审批');
+    }
+
+
+    document.getElementById("worktable").style.height = document.body.clientHeight + "px";
+</script>
+
+
+

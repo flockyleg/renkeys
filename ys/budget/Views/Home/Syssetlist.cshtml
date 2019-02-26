@@ -1,0 +1,429 @@
+﻿@using applyvisa.Models;
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "系统参数";
+
+    int percount = 20;   //每页20行
+    int pagenum = 0;     //当前页码
+    int pagetotal = 0;   //总页数
+
+    string s1 = "";
+    string s2 = "";
+    string s3 = "";
+    string s4 = "";
+    List<cls系统参数> lstsb = null;
+
+    try { pagenum = (int)ViewBag.pagenum; }
+    catch { }
+    try { pagetotal = (int)ViewBag.pagetotal; }
+    catch { }
+
+    try { s1 = (string)TempData["sbcx_t1"]; }
+    catch { }
+    try { s2 = (string)TempData["sbcx_t2"]; }
+    catch { }
+    try { s3 = (string)TempData["sbcx_t3"]; }
+    catch { }
+    try { s4 = (string)TempData["sbcx_t4"]; }
+    catch { }
+
+    try { lstsb = (List<cls系统参数>)ViewBag.pagedata; }
+    catch { }
+    if (lstsb == null)
+    {
+        lstsb = new List<cls系统参数>();
+    }
+    int i = 0;
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+
+    <script type="text/javascript" src="~/Others/js/alert.js"></script>
+
+    <style>
+        #countrycolor {
+            color: #FF7F00;
+            text-wrap: none;
+        }
+
+        p.xingming {
+            font-size: 15px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: white;
+            background-color: #280581;
+            height: 35px;
+            vertical-align: middle;
+            display: block;
+            line-height: 35px;
+            text-align: left;
+        }
+
+        p.xiangqing {
+            font-size: 13px;
+            /*font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;*/
+            color: black;
+            background-color: #a3abcf;
+            height: 100%;
+        }
+
+        .parent {
+            width: 100%;
+            height: 230px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .children {
+            display: inline-block;
+            width: 150px;
+            height: 150px;
+        }
+
+        .button {
+            font-size: 16px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: expanded;
+            color: #333333;
+        }
+
+        * + html .children {
+            display: inline;
+            zoom: 1;
+        }
+
+        * html .children {
+            display: inline;
+            zoom: 1;
+        }
+    </style>
+
+    <style type="text/css">
+        .pop-box {
+            /*弹出窗口后，弹出的DIV采用此CSS，保证置于最上层
+          z-index控制Z轴的坐标，数值越大，离用户越近
+        */
+            z-index: 9999999; /*这个数值要足够大，才能够显示在最上层*/
+            margin-bottom: 3px;
+            display: none;
+            position: absolute;
+        }
+
+        #bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            /*弹出窗口后，添加遮罩层，采用此CSS，将该层置于弹出DIV和页面层之间
+          z-index控制Z轴的坐标，数值越大，离用户越近  rgba(72, 74, 68, 0.46)
+        */
+            z-index: 1001;
+            background-color: #cfcdcd;
+            -moz-opacity: 0.7;
+            opacity: .70;
+            filter: alpha(opacity = 70);
+        }
+
+        td.style1 {
+            background-color: lightblue;
+            text-align: center;
+            color: gray;
+        }
+    </style>
+
+    <script type="text/javascript">
+        /*显示DIV*/
+        function popupDiv(div_id, id, csm, csz, sm) {
+
+            var a = document.getElementById('txtyhid')
+            a.value = id;
+
+            var v1 = document.getElementById('txtcsm')
+            v1.value = csm;
+            var v2 = document.getElementById('txtcsz')
+            v2.value = csz;
+            var v3 = document.getElementById('txtsm')
+            v3.value = sm;
+
+            // 获取传入的DIV
+            var $div_obj = $("#" + div_id);
+            // 计算机屏幕高度
+            var windowWidth = $(window).width();
+            // 计算机屏幕长度
+            var windowHeight = $(window).height();
+            // 取得传入DIV的高度
+            var popupHeight = $div_obj.height();
+            // 取得传入DIV的长度
+            var popupWidth = $div_obj.width();
+
+            var documentWidth = $(document).width();
+            var documentHeight = $(document).height();
+
+            $("<div id='bg'></div>").width(documentWidth * 0.99)
+                    .height(documentHeight * 0.99).click(function () {
+                        //hideDiv(div_id);
+                    }).appendTo("body").fadeIn(200);
+
+            var left1 = windowWidth / 2 - popupWidth / 2;
+            var top1 = windowHeight / 2 - popupHeight / 2;
+            if (left1 < 0) left1 = 0;
+            if (top1 < 0) top1 = 0;
+            if (left1 < $(document).scrollLeft()) left1 = $(document).scrollLeft();
+            if (top1 < $(document).scrollTop()) top1 = $(document).scrollTop();
+            top1 = $(document).scrollTop() - 30;   //直接靠上对齐
+            $div_obj.css({
+                "position": "absloute"
+            }).animate({
+                left: left1,
+                top: top1,
+                opacity: "show"
+            }, "slow");
+
+            var chkObjs = "";
+            var obj = document.getElementsByName("chkqx")
+            for (var i = 0; i < obj.length; i++) {
+                if (b.value.search(obj[i].value) > -1) {  //indexof不行
+                    obj[i].checked = true;
+                }
+            }
+        }
+
+        /*隐藏DIV*/
+        function hideDiv(div_id) {
+            $("#bg").remove();
+            $("#" + div_id).animate({
+                left: 0,
+                top: 0,
+                opacity: "hide"
+            }, "slow");
+        }
+
+    </script>
+
+
+</head>
+
+<body style="background-color: #2A293B;">
+
+
+    <div id="popSQR" class="pop-box">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <input id="txtyhid" type="hidden">
+
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popSQR');">×</button>
+                    <h4 id="myModalLabel" class="modal-title">系统参数（勿随意修改）</h4>
+                </div>
+                <div class="panel-body" style="height: 100%;">
+                    <div class="parent" style="text-align: left; height: auto;">
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">参数名</span>
+                            <input id="txtcsm" type="text" class="form-control" readonly="readonly">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">参数值</span>
+                            <input id="txtcsz" type="text" class="form-control">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">说明　</span>
+                            <input id="txtsm" type="text" class="form-control" readonly="readonly">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input id="lblMsg1" type="text" readonly="readonly" style="border-style:none;color:red;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popSQR');">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="configDiv_Yd('popSQR');">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <table id="worktable" style="width: 1024px; background-color: white; min-height: 400px; margin-right: auto; margin-left: auto;">
+        <tr>
+            <td style="height:100%;vertical-align:top;">
+                <div class="divbackground">
+                    <li class="list-group-item">
+                        <table style="width:100%;height:60px;">
+                            <tr style="width:100%">
+                                <td colspan="3" style="text-align:center;font-size:18px;">系 统 参 数</td>
+                            </tr>
+                            <tr style="width:100%">
+                                <td style="text-align: right; "></td>
+                                <td style="width: 180px; text-align: center; "></td>
+                                <td style="text-align: right; ">
+                                    <button id="butSx" class="btn btn-primary" type="button" style="width:100px;" onclick="rollto(0);">刷　新</button>
+                                    &nbsp;&nbsp;<button id="butSx" class="btn btn-primary" type="button" style="width:100px;" onclick="previousstep();">关　闭</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </li>
+
+                    <li class="list-group-item">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width:160px;">参数名</th>
+                                    <th style="width:600px;">参数值</th>
+                                    <th style="width:200px;">说明</th>
+                                    <th style="width:60px;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @{
+
+                                    for (i = 0; i < lstsb.Count; i++)
+                                    {
+                                        int xh = (pagenum - 1) * percount + i + 1;
+                                        <tr>
+                                            <td style="width:160px;">@lstsb[i].参数名</td>
+                                            <td style="width:600px;">@lstsb[i].参数值</td>
+                                            <td style="width:200px;">@lstsb[i].说明</td>
+                                            <td style="width:60px;"><a href="javascript:popupDiv('popSQR','@lstsb[i].ID','@lstsb[i].参数名','@lstsb[i].参数值','@lstsb[i].说明');">修改</a></td>
+                                        </tr>
+                                    }
+
+                                }
+
+                            </tbody>
+                        </table>
+
+
+                        <br>
+                        <input id="dqy" type="hidden" value="@pagenum"><input id="zys" type="hidden" value="@pagetotal">
+
+                        <table style="width:100%;height:60px;">
+                            <tr style="width:100%">
+                                <td></td>
+                                <td style="text-align: center; width:360px;">
+
+                                    <div class="input-group">
+                                        <span class="input-group-addon">共 @pagetotal 页 / 第</span>
+                                        <input id="txtdangqianye" type="text" class="form-control" style="text-align:center;" value="@pagenum">
+                                        <span class="input-group-addon">页</span>
+                                        <span class="input-group-btn">
+                                            <button id="butsyy" class="btn btn-default" type="button" onclick="rollto(-1);">﹤</button>
+                                        </span>
+                                        <span class="input-group-btn">
+                                            <button id="butxyy" class="btn btn-default" type="button" onclick="rollto(1);">﹥</button>
+                                        </span>
+                                        <span class="input-group-btn">
+                                            <button id="butxy" class="btn btn-default" type="button" onclick="rollto(0);">Go</button>
+                                        </span>
+                                    </div>
+
+
+                                </td>
+                                <td></td>
+                            </tr>
+                        </table>
+
+                    </li>
+
+
+
+                </div>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
+
+
+<script type="text/javascript" src="~/Others/js/confirm.js"></script>
+<script type="text/javascript" language="javascript">
+
+    function previousstep() {
+        window.location = "Index";
+    }
+
+    function rollto(intstep) {
+        var a1 = "1";
+        var a2 = "1";
+        var a = "1";
+        a1 = $("#dqy").val();
+        a2 = $("#zys").val();
+        a = $("#txtdangqianye").val();
+        if (a1 == "" || undefined || null) {
+            a1 = '1';
+        }
+        if (a2 == "" || undefined || null) {
+            a2 = '1';
+        }
+        if (a == "" || undefined || null) {
+            a = '1';
+        }
+        a = parseInt(a) + parseInt(intstep);
+        //if (parseInt(a1) > parseInt(a2)) {
+        //    a1 = a2;
+        //}
+        //if (parseInt(a) < parseInt(a1)) {
+        //    a = a1;
+        //}
+        //if (parseInt(a) > parseInt(a2)) {
+        //    a = a2;
+        //}
+
+
+        $("#txtdangqianye").val(a);
+
+        var s = "../Home/Syssetlist?p=" + a;
+        window.location = s;
+    }
+
+    function configDiv_Yd(div_id) {
+        var id = $("#txtyhid").val();
+        if (id == "" || undefined || null) {
+            id = "";
+        }
+        var csz = $("#txtcsz").val();
+        if (csz == "" || undefined || null) {
+            csz = "";
+            return false;
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: "/Home/SaveSysset",
+            data: {
+                id: id,
+                csz: csz
+            },
+            dataType: "text",
+            success: function (sesponseTest) {
+                switch (sesponseTest) {
+                    case 401:
+                        alert('保存失败，未知的记录。');
+                        break;
+                    case 402:
+                        alert('保存失败，名称未输入。');
+                        break;
+                    default:
+                        hideDiv(div_id);
+                        alert('保存成功，点击刷新按钮获取更新列表。');
+                        break;
+                }
+            }
+        });
+    }
+
+    function comboitemclick(txtid, txtvalue) {
+        var a = document.getElementById(txtid)
+        a.value = txtvalue;
+    }
+
+    document.getElementById("worktable").style.height = document.body.clientHeight + "px";
+</script>
+
+
+

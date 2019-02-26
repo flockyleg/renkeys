@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "budget", "budget\budget.csproj", "{D1F4A3EA-4672-4E71-B088-308052A32C93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "中证通数据", "中证通数据\中证通数据.csproj", "{E25F27A7-BAA1-4D0B-A9CF-CCBB9294E6DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "老数据导入", "老数据导入\老数据导入.csproj", "{D12C7CBD-D150-43B6-85F2-7A1867CB7E89}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "budgetMSSQL", "budgetMSSQL\budgetMSSQL.csproj", "{2C3C60CD-F30B-4F5F-8995-275FD858E4AA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D1F4A3EA-4672-4E71-B088-308052A32C93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1F4A3EA-4672-4E71-B088-308052A32C93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1F4A3EA-4672-4E71-B088-308052A32C93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1F4A3EA-4672-4E71-B088-308052A32C93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E25F27A7-BAA1-4D0B-A9CF-CCBB9294E6DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E25F27A7-BAA1-4D0B-A9CF-CCBB9294E6DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E25F27A7-BAA1-4D0B-A9CF-CCBB9294E6DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E25F27A7-BAA1-4D0B-A9CF-CCBB9294E6DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D12C7CBD-D150-43B6-85F2-7A1867CB7E89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D12C7CBD-D150-43B6-85F2-7A1867CB7E89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D12C7CBD-D150-43B6-85F2-7A1867CB7E89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D12C7CBD-D150-43B6-85F2-7A1867CB7E89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C3C60CD-F30B-4F5F-8995-275FD858E4AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C3C60CD-F30B-4F5F-8995-275FD858E4AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C3C60CD-F30B-4F5F-8995-275FD858E4AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C3C60CD-F30B-4F5F-8995-275FD858E4AA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

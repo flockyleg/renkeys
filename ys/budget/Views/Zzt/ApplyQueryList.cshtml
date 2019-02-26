@@ -1,0 +1,314 @@
+﻿@model applyvisa.Models.cls预算单s
+
+@{
+
+    Layout = null;
+
+    var wheresql_ApplyQueryCx = TempData["wheresql_ApplyQueryCx_zzt"] as string;
+    int i = 0;
+
+    decimal dec1 = 0.00m;
+    decimal dec2 = 0.00m;
+    decimal dec3 = 0.00m;
+    decimal dec4 = 0.00m;
+    decimal dec5 = 0.00m;
+    decimal dec6 = 0.00m;
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+
+    <script type="text/javascript" src="~/Others/js/alert.js"></script>
+
+    <style>
+        .parent {
+            width: 100%;
+            height: 230px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .button {
+            font-size: 16px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: expanded;
+            color: #333333;
+        }
+    </style>
+
+    <style type="text/css">
+        .pop-box {
+            /*弹出窗口后，弹出的DIV采用此CSS，保证置于最上层
+          z-index控制Z轴的坐标，数值越大，离用户越近
+        */
+            z-index: 9999999; /*这个数值要足够大，才能够显示在最上层*/
+            margin-bottom: 3px;
+            display: none;
+            position: absolute;
+        }
+
+        #bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            /*弹出窗口后，添加遮罩层，采用此CSS，将该层置于弹出DIV和页面层之间
+          z-index控制Z轴的坐标，数值越大，离用户越近  rgba(72, 74, 68, 0.46)
+        */
+            z-index: 1001;
+            background-color: #cfcdcd;
+            -moz-opacity: 0.7;
+            opacity: .70;
+            filter: alpha(opacity = 70);
+        }
+
+        td.style1 {
+            background-color: lightblue;
+            text-align: center;
+            color: gray;
+        }
+    </style>
+    <script type="text/javascript">
+        /*显示DIV*/
+        function popupDiv(div_id, banliid) {
+
+            var a = document.getElementById('txtbanliid')
+            a.value = banliid;
+
+
+            // 获取传入的DIV
+            var $div_obj = $("#" + div_id);
+            // 计算机屏幕高度
+            var windowWidth = $(window).width();
+            // 计算机屏幕长度
+            var windowHeight = $(window).height();
+            // 取得传入DIV的高度
+            var popupHeight = $div_obj.height();
+            // 取得传入DIV的长度
+            var popupWidth = $div_obj.width();
+
+            var documentWidth = $(document).width();
+            var documentHeight = $(document).height();
+
+            $("<div id='bg'></div>").width(documentWidth * 0.99)
+                    .height(documentHeight * 0.99).click(function () {
+                        //hideDiv(div_id);
+                    }).appendTo("body").fadeIn(200);
+
+            var left1 = windowWidth / 2 - popupWidth / 2;
+            var top1 = windowHeight / 2 - popupHeight / 2;
+            if (left1 < 0) left1 = 0;
+            if (top1 < 0) top1 = 0;
+            if (left1 < $(document).scrollLeft()) left1 = $(document).scrollLeft();
+            if (top1 < $(document).scrollTop()) top1 = $(document).scrollTop();
+            top1 = $(document).scrollTop() - 30;   //直接靠上对齐
+            $div_obj.css({
+                "position": "absloute"
+            }).animate({
+                left: left1,
+                top: top1,
+                opacity: "show"
+            }, "slow");
+        }
+
+        /*隐藏DIV*/
+        function hideDiv(div_id) {
+            $("#bg").remove();
+            $("#" + div_id).animate({
+                left: 0,
+                top: 0,
+                opacity: "hide"
+            }, "slow");
+        }
+
+
+
+    </script>
+
+</head>
+
+<body style="background-color: #2A293B;">
+
+    <input id="wheresql" type="hidden" value="@wheresql_ApplyQueryCx">
+
+    <div id="popXQ" class="pop-box" style="width:840px;">
+        <div class="modal-dialog" style="width: 840px;">
+            <div class="modal-content" style="width: 840px;">
+
+                <input id="txtbanliid" type="hidden">
+
+                <div class="modal-header" style="width: 838px; background-color: #97bad1;">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popXQ');">×</button>
+                    <input id="lblXqbt" type="text" readonly="readonly" style="z-index: 0; border: none; width: 400px; background-color: #97bad1;color:white;">
+                </div>
+                <div id="ysxiangqing" class="panel-body" style="background-color: #FDFDFD; ">
+
+                </div>
+                <div class="modal-footer" style="background-color: #FDFDFD;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popXQ');">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <table id="worktable" style="width: 1200px; background-color: white; min-height: 400px; margin-right: auto; margin-left: auto;">
+        <tr>
+            <td style="height:100%;vertical-align:top;">
+                <div class="divbackground">
+                    <li class="list-group-item">
+                        <table style="width:100%;height:60px;">
+                            <tr style="width:100%">
+                                <td style="text-align: right; "></td>
+                                <td style="width: 180px; text-align: center; "></td>
+                                <td style="text-align: right; "><button onclick="Export2Excel();" class="btn btn-success" type="button" style="width:100px;">导　出</button></td>
+                            </tr>
+                        </table>
+                    </li>
+
+                    <li class="list-group-item">
+                        <div style="width: 100%; height: 36px; overflow: auto;">
+                            <table style="width:1120px; font-size: 10px;" cellspacing="0" cellpadding="0">
+                                <tr style="border-bottom: solid 1px #ddeefa; height: 30px; ">
+                                    <th style="text-align: center; width: 30px;">序号</th>
+                                    <th style="text-align: center; width: 40px;">分类</th>
+                                    <th style="text-align: center; width: 100px;">业务类型</th>
+                                    <th style="text-align: center; width: 100px;">预算编号</th>
+                                    <th style="text-align: center; width: 240px;">中证通订单号</th>
+                                    <th style="text-align: center; width: 150px;">预算名称</th>
+                                    <th style="text-align: center; width: 80px;">成本中心编号</th>
+                                    <th style="text-align: center; width: 80px;">申请日期</th>
+                                    <th style="text-align: center; width: 60px;">预算收入</th>
+                                    <th style="text-align: center; width: 60px;">预算支出</th>
+                                    <th style="text-align: center; width: 60px;">实际收入</th>
+                                    <th style="text-align: center; width: 60px;">实际支出</th>
+                                    <th style="text-align: center; width: 60px;">状态</th>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div style="width: 100%; height: 500px; overflow: auto;">
+
+                            <table style="width:1120px; font-size: 10px;" cellspacing="0" cellpadding="0">
+
+
+                                <thead>
+                                    @{
+
+                                        dec1 = 0.00m;
+                                        dec2 = 0.00m;
+                                        dec3 = 0.00m;
+                                        dec4 = 0.00m;
+                                        dec5 = 0.00m;
+                                        dec6 = 0.00m;
+                                        for (i = 0; i < Model.记录集.Count; i++)
+                                        {
+
+                                            dec1 = dec1 + Model.记录集[i].管理_预算收入金额;
+                                            dec2 = dec2 + Model.记录集[i].管理_预算销项税额;
+                                            dec3 = dec3 + Model.记录集[i].管理_预算支出金额;
+                                            dec4 = dec4 + Model.记录集[i].管理_预算进项税额;
+                                            dec5 = dec5 + Model.记录集[i].管理_实际收入金额;
+                                            dec6 = dec6 + Model.记录集[i].管理_实际支出金额;
+                                        }
+                                    }
+                                    <tr style="border-bottom: solid 1px #ddeefa; height: 30px; ">
+                                        <th style="text-align: center; width: 30px;"></th>
+                                        <th style="text-align: center; width: 40px;"></th>
+                                        <th style="text-align: center; width: 100px;"></th>
+                                        <th style="text-align: center; width: 100px;">合计</th>
+                                        <th style="text-align: center; width: 240px;"></th>
+                                        <th style="text-align: center; width: 150px;"></th>
+                                        <th style="text-align: center; width: 80px;"></th>
+                                        <th style="text-align: center; width: 80px;"></th>
+                                        <th style="text-align: center; width: 60px;"><input id="dec1" type="text" readonly="readonly" style="border:none;width:60px;" value="@dec1"></th>
+                                        <th style="text-align: center; width: 60px;"><input id="dec3" type="text" readonly="readonly" style="border:none;width:60px;" value="@dec3"></th>
+                                        <th style="text-align: center; width: 60px;"><input id="dec5" type="text" readonly="readonly" style="border:none;width:60px;" value="@dec5"></th>
+                                        <th style="text-align: center; width: 60px;"><input id="dec6" type="text" readonly="readonly" style="border:none;width:60px;" value="@dec6"></th>
+                                        <th style="text-align: center; width: 60px;"></th>
+                                    </tr>
+                                </thead>
+
+
+                                <tbody>
+
+                                    @{
+
+                                        for (i = 0; i < Model.记录集.Count; i++)
+                                        {
+                                            int xh = i + 1;
+                                            string s1 = "固定";
+                                            if (Model.记录集[i].类型 == 1)
+                                            {
+                                                s1 = "项目";
+                                            }
+
+                                            <tr style="width: 1120px; border-bottom: solid 1px #ddeefa; height: 30px;">
+                                                <td style="text-align: center; width: 30px;">@xh</td>
+                                                <td style="text-align: center; width: 40px;">@s1</td>
+                                                <td style="text-align: center; width: 100px;">@Model.记录集[i].业务类型</td>
+                                                <td style="text-align: center; width: 100px;"><a href="javascript:showDetail('@Model.记录集[i].ID','@Model.记录集[i].类型');">@Model.记录集[i].预算编号</a></td>
+                                                <td style="text-align: center; width: 240px;">
+                                                    <input type="text" style="width: 240px; border: none;" readonly="readonly" value="@Model.记录集[i].子订单号">
+                                                </td>
+                                                <td style="text-align: left; width: 150px;">&nbsp;@Model.记录集[i].预算名称</td>
+                                                <td style="text-align: center; width: 80px;">@Model.记录集[i].成本中心编号</td>
+                                                <td style="text-align: center; width: 80px;">@Model.记录集[i].申请日期.ToString("yyyy-MM-dd")</td>
+                                                <td style="text-align: center; width: 60px;">@Model.记录集[i].管理_预算收入金额</td>
+                                                <td style="text-align: center; width: 60px;">@Model.记录集[i].管理_预算支出金额</td>
+                                                <td style="text-align: center; width: 60px;">@Model.记录集[i].管理_实际收入金额</td>
+                                                <td style="text-align: center; width: 60px;">@Model.记录集[i].管理_实际支出金额</td>
+                                                <td style="text-align: center; width: 60px;">@Model.记录集[i].预算状态</td>
+                                            </tr>
+                                        }
+
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+
+
+                        </div>
+                    </li>
+
+
+                </div>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
+
+
+<script type="text/javascript" language="javascript">
+
+    function showDetail(strid, strlx) {
+        $("#ysxiangqing").load("/Main/StaticApplyView", { "id": strid }, function () {
+            var cp = '固定';
+            if (strlx == '1') cp = '项目';
+            $("#lblXqbt").val(' ' + cp + '预算浏览');
+            popupDiv('popXQ', strid);
+        });
+    }
+
+    function Export2Excel() {
+        var q = $("#wheresql").val();
+        if (q == "" || undefined || null) {
+            q = " where 1=2";
+        }
+        q = escape(q);
+        var s = "../Zzt/Export2Excel_ApplyQueryList?w=" + q;
+        window.location = s;
+    }
+
+</script>
+
+
+

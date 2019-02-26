@@ -1,0 +1,341 @@
+﻿@{
+    Layout = null;
+    ViewBag.Title = "上海人科数据内部预算系统";
+
+    string dengluzhe = ViewBag.dlzx as string;
+    if (dengluzhe.IsEmpty())
+    {
+        dengluzhe = "关闭";
+    }
+    else
+    {
+        dengluzhe = dengluzhe + " 注销";
+    }
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <!-- Bootstrap移动框架使用时必须设置meta标签，然后引用bootstrap.css文件 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="上海人科,预算" />
+    <link href="~/css1/css/bootstrap.css" rel="stylesheet" type="text/css" media="all" />
+    <link href="~/css1/css/style.css" rel="stylesheet" type="text/css" media="all" />
+    <script src="~/css1/js/jquery-1.11.1.min.js"></script>
+    <link href="~/css1/css/animate.min.css" rel="stylesheet">
+    <script src="~/css1/js/wow.min.js"></script>
+    <!-- [if lt IE 9]  <script src="~/css1/js/respond.min.js"></script>  -->
+    <link href="~/css1/css/stylemenu.css" rel="stylesheet" type="text/css" media="all" />
+
+    <style>
+        .logotext {
+            font-size: 20px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: expanded;
+            color: #FFFFFF;
+        }
+
+        .logotextsub {
+            font-size: 12px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: normal;
+            color: #FFFFFF;
+        }
+
+        a.mubanyesty1 {
+            font-size: 15px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+            a.mubanyesty1:hover {
+                font-size: 15px;
+                font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+                color: gray;
+                text-decoration: none;
+            }
+
+        a.frilnk1 {
+            color: gray;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+            a.frilnk1:hover {
+                color: white;
+                text-decoration: none;
+            }
+
+        #buttonprecolor { /*按钮前面的符号*/
+            color: #FF7F00;
+            text-wrap: none;
+        }
+    </style>
+
+</head>
+<body style="margin-top: 0px; background-color: #2A293B; height: 100%;">
+    <div style="position:fixed;right:0;top:20px;width:170px;height:30px;background-color:transparent;">
+        <a id="txtdl" class="mubanyesty1" href="#" onclick="custom_close();">注销</a>
+        &nbsp;&nbsp;<a id="jishiqi" class="mubanyesty1" onclick="showMsg();"></a>
+    </div>
+
+    <table id="maincaption" style="width: 100%; height: 120px; background-color: #2A293B; vertical-align: central; ">
+        <tr style="height:60px;vertical-align:middle;">
+            <td>
+                <div align="center">
+                    <table border="0" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td width="50px" rowspan="2"><div align="left"><a href="~/Home/Index"><img src="~/Images/rklogo.png" style="width:40px;height:40px;" /></a></div></td>
+                            <td height="30" valign="bottom"><span class="logotext">@ViewBag.Title</span></td>
+                        </tr>
+                        <tr>
+                            <td valign="top"><span class="logotextsub">Shanghai RENOS DATA Budget MIS</span></td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td height="20px;" style="text-align:center;">
+                <div class="htmleaf-container">
+                    <nav class="animenu">
+                        <button class="animenu__toggle">
+                            <span class="animenu__toggle__bar"></span>
+                            <span class="animenu__toggle__bar"></span>
+                            <span class="animenu__toggle__bar"></span>
+                        </button>
+                        <ul class="animenu__nav">
+                            <li>
+                                <a href="#">固定预算</a>
+                                <ul class="animenu__nav__child">
+                                    <li><a href="~/Main/FinanceApply">固定预算申请</a></li>
+                                    <li><a href="~/Main/StaticApplyList?p=1&r=1&t=0">固定预算查询</a></li>   @*<li><a href="~/Main/StaticApplyList1?p=1&r=1">固定预算查询</a></li>*@
+                                    <li><a href="~/Main/StaticApplyChange?p=1&r=1&t=0">固定预算变更申请</a></li>   @*<li><a href="~/Main/StaticApplyChange1?p=1&r=1">固定预算变更申请</a></li>*@
+                                    <li><a href="">固定预算变更查询</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#">项目预算</a>
+                                <ul class="animenu__nav__child">
+                                    <li><a href="~/Main/ProjectApply">项目预算申请</a></li>
+                                    <li><a href="~/Main/StaticApplyList?p=1&r=1&t=1">项目预算查询</a></li>   @*<li><a href="~/Main/StaticApplyList2?p=1&r=1">项目预算查询</a></li>*@
+                                    <li><a href="~/Main/StaticApplyChange?p=1&r=1&t=1">项目预算变更申请</a></li>   @*<li><a href="~/Main/StaticApplyChange2?p=1&r=1">项目预算变更申请</a></li>*@
+                                    <li><a href="">项目预算变更查询</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#">中证通</a>
+                                <ul class="animenu__nav__child">
+                                    @*<li><a href="~/Zzt/OrderList?p=1&r=1&t=0">中证通订单实际收支</a></li>
+                                    <li><a href="~/Zzt/OrderList?p=1&r=1&t=2">中证通订单查询</a></li>*@
+                                    <li><a href="~/Zzt/ApplyQuery">中证通订单查询</a></li>
+                                    @*<li><a href="~/Check/CheckZztQuery">中证通订单对账</a></li>*@
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#">激励</a>
+                                <ul class="animenu__nav__child">
+                                    <li><a href="~/Main/StaticApplyMotivationList?p=1&r=1">激励申请</a></li>  @*<li><a href="~/Main/StaticApplyMotivationList1?p=1&r=1">激励申请</a></li>*@
+                                    <li><a href="~/Main/StaticApplyMotivationQuery?p=1&r=1&t=0">激励查询</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#">审批核定</a>
+                                <ul class="animenu__nav__child">
+                                    <li><a href="~/Main/ApproveStaticApplyList?p=1&cxtj=">待审批预算</a></li>
+                                    <li><a href="~/Main/CheckStaticApplyList?p=1&cxtj=">待核定预算</a></li>
+                                    <li><a href="~/Main/StaticApplyChangeApproveList?p=1">待审批变更</a></li>
+                                    <li><a href="~/Main/StaticApplyMotivationApproveList?p=1">待审批激励</a></li>                                    
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#">账务处理</a>
+                                <ul class="animenu__nav__child">
+                                    <li><a href="~/Main/StaticApplyActualList?p=1&r=1">实际收支输入</a></li>
+                                    <li><a href="~/Main/Webappoint">系统转账</a></li>
+                                    <li><a href="~/Main/Webappointlist?p=0">手动转账</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#">查询统计</a>
+                                <ul class="animenu__nav__child">
+                                    @*<li><a href="~/Main/StaticApplyListX?p=1&r=1">预算查询(全)</a></li>*@
+                                    <li><a href="~/Main/StaticApplyList?p=1&r=1&t=2">预算查询(全)</a></li>
+                                    <li><a href="~/Main/ApplyQuery">预算查询统计</a></li>
+                                    <li><a href="">预算变更查询(全)</a></li>
+                                    <li><a href="~/Main/StaticApplyMotivationQuery?p=1&r=1&t=2">激励查询(全)</a></li>
+                                    <li><a href="~/Report/rpt1">预算盈亏表</a></li>
+                                    <li><a href="~/Report/rpt2">实际盈亏表</a></li>
+                                    <li><a href="~/Report/rpt3">应收应付表</a></li>
+                                    <li><a href="~/Report/rpt4">业绩跟踪表</a></li>
+                                    <li><a href="~/Report/rpt5">中证通订单应收表</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#">控制</a>
+                                <ul class="animenu__nav__child">
+                                    <li><a href="~/Home/MsgList?p=1&r=1">消息管理</a></li>
+                                    <li><a href="~/Home/Syssetlist?p=1">基本参数</a></li>
+                                    <li><a href="~/Home/Deplist?p=1">公司部门</a></li>
+                                    <li><a href="~/Home/Costlist?p=1">成本中心</a></li>
+                                    <li><a href="~/Home/Yonghulist?p=1">用户管理</a></li> 
+                                    <li><a href="~/Home/Yonghumima">修改密码</a></li>
+                                    @*<li><a href="~/Home/StepUpfiles">测试用</a></li>*@
+                                    
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <div id="divform" style="height:100%;">
+        @RenderBody()
+    </div>
+
+    <script src="~/css1/js/bootstrap.js"></script>
+    @Scripts.Render("~/bundles/jquery")
+    @RenderSection("scripts", required: false)
+
+
+
+    <input id="txtloginname" type="hidden" value="@dengluzhe">
+</body>
+</html>
+
+<script type="text/javascript">
+    (function () {
+        var animenuToggle = document.querySelector('.animenu__toggle'),
+            animenuNav = document.querySelector('.animenu__nav'),
+            hasClass = function (elem, className) {
+                return new RegExp(' ' + className + ' ').test(' ' + elem.className + ' ');
+            },
+            toggleClass = function (elem, className) {
+                var newClass = ' ' + elem.className.replace(/[\t\r\n]/g, ' ') + ' ';
+                if (hasClass(elem, className)) {
+                    while (newClass.indexOf(' ' + className + ' ') >= 0) {
+                        newClass = newClass.replace(' ' + className + ' ', ' ');
+                    }
+                    elem.className = newClass.replace(/^\s+|\s+$/g, '');
+                } else {
+                    elem.className += ' ' + className;
+                }
+            },
+            animenuToggleNav = function () {
+                toggleClass(animenuToggle, "animenu__toggle--active");
+                toggleClass(animenuNav, "animenu__nav--open");
+            }
+
+        if (!animenuToggle.addEventListener) {
+            animenuToggle.attachEvent("onclick", animenuToggleNav);
+        }
+        else {
+            animenuToggle.addEventListener('click', animenuToggleNav);
+        }
+    })()
+
+
+    function custom_close() {
+        var tdl = document.getElementById('txtdl');
+        if (tdl.innerText == "登录") {            
+            $.ajax({
+                type: 'POST',
+                url: "/Home/loginagain",
+                data: {
+                },
+                dataType: "text",
+                success: function (sesponseTest) {
+                    //nothing
+                }
+            });
+        }
+        else {
+            $.ajax({
+                type: 'POST',
+                url: "/Home/zhuxiao",
+                data: {
+                },
+                dataType: "text",
+                success: function (sesponseTest) {
+                    if (sesponseTest == "ok") {
+                        //if (confirm("已经注销，要关闭页面吗？")) {
+                        //    window.opener = null;
+                        //    window.open('', '_self');
+                        //    window.close();
+                        //}
+                        //else {
+                            tdl.innerText = "登录";
+                            window.location = "Index";
+                        //}
+                    }
+                    else {
+                        alert("注销失败，请稍后再试，或者直接关闭浏览器。");
+                    }
+                }
+            }); 
+        }
+    }
+
+    function showMsg() {
+        //window.open('~/Home/MessageList?p=1&r=1', '_blank');
+        var s = "/Home/MessageList?p=1&r=1";
+        window.open(s, '_blank');
+    }
+
+    //var a = document.getElementById('txtdl');
+    //var b = document.getElementById('txtloginname');
+    //a.innerText = b.value;
+
+</script>
+
+
+<script language="javascript" type="text/javascript">
+    setTimeout("ShowTime()", 600000);   //10分钟刷新1次
+    function ShowTime() {
+        var tdl = document.getElementById('txtdl');
+        var s1 = tdl.innerText;
+        if (s1 == "" || undefined || null) {
+            s = "";
+        }
+        if (s1 == "") return;
+        if (s1 == "登录") return;
+        s1 = s1.replace("注销", "").trim();
+
+        $.ajax({
+            type: 'POST',
+            url: "/Home/GetInformation",
+            data: {
+                loginrealname: s1
+            },
+            dataType: "json",
+            success: function (sesponseTest) {
+                switch (sesponseTest) {
+                    case 300001:
+                        break;
+                    default:
+                        //$("#jishiqi").val("消息:" + sesponseTest);
+                        var jsq = document.getElementById('jishiqi');
+                        jsq.innerText = "消息:" + sesponseTest;
+                        break;
+                }
+
+            }
+        });
+
+        setTimeout("ShowTime()", 600000);
+    }
+</script>
+
+
+<script language="javascript" type="text/javascript">
+    var a = document.getElementById('txtdl');
+    var b = document.getElementById('txtloginname');
+    a.innerText = b.value;
+    ShowTime();
+</script>

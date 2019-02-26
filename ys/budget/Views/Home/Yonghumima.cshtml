@@ -1,0 +1,114 @@
+﻿@using applyvisa.Models;
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "修改密码";
+
+    cls用户 yh = ViewBag.yonghu as cls用户;
+}
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>@ViewBag.Title</title>
+</head>
+
+<body style="margin-top:0px;">
+    <div style="width:380px;height:300px;position:absolute;left:50%;top:50%;margin-top:-150px;margin-left:-175px;border:solid #c6c4c4 0px;">
+        <div class="col-sm-6" style="width:100%">
+            <div class="panel panel-default" style="width:100%">
+                <div class="panel-heading"><img src="~/images/login.gif" alt="">修改密码</div>
+                <div class="panel-body">
+                    <table style="width:96%;">
+                        <tr style="height:50px;">
+                            <td style="width:60px;">登录名</td>
+                            <td><input id="loginname" type="text" class="form-control" readonly="readonly" value="@yh.登录名"></td>
+                        </tr>
+                        <tr style="height:50px;">
+                            <td style="width:60px;">密　码</td>
+                            <td><input id="ymm" type="password" placeholder="原密码" class="form-control"></td>
+                        </tr>
+                        <tr style="height:50px;">
+                            <td style="width:60px;">新密码</td>
+                            <td><input id="xmm" type="password" placeholder="新密码" class="form-control"></td>
+                        </tr>
+                    </table>
+                    <br><br>
+                    <p style="text-align:center"><input type="button" id="butqd" value="　确　定　" class="btn btn-primary" /> &nbsp;&nbsp;&nbsp;&nbsp;<input type="button" onclick="quxiao();" value="　取　消　" class="btn btn-primary" /></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+
+
+
+<script type="text/javascript" language="javascript">
+    function returnsy() {
+        window.location.href = "/Home/Index";
+    }
+
+
+    function topreview() {
+        window.history.back(-1)
+    }
+
+    function quxiao() {
+        window.location = "Index";
+    }
+</script>
+
+
+
+<script type="text/javascript" src="~/Others/js/alert.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $("#butqd").click(function () {
+            $.ajax({
+                type: 'POST',
+                url: "/Home/Yonghumimiedit",
+                data: {
+                    dlm: $("#loginname").val(),
+                    ymm: $("#ymm").val(),
+                    xmm: $("#xmm").val()
+                },
+                dataType: "json",
+                success: function (sesponseTest) {
+                    switch(sesponseTest)
+                    {
+                        case 900001:
+                            alert("未登录或当前用户无效，不能修改密码。");
+                            break;
+                        case 900002:
+                            alert("原密码不对。");
+                            break;
+                        case 900003:
+                            alert("密码修改失败。");
+                            break;
+                        default:
+                            alert("密码修改成功。");
+                            window.location.href = "Index";
+                            break;
+                    }
+                }
+            });
+        });
+    });
+
+
+    $(document).keyup(function (event) {
+        if (event.keyCode == 13) {
+            $("#butqd").trigger("click");
+        }
+    });
+
+
+    document.getElementById("worktable").style.height = document.body.clientHeight + "px";
+</script>
+
+

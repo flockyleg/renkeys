@@ -1,0 +1,515 @@
+﻿@using applyvisa.Models;
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "消息管理";
+
+    int percount = 20;   //每页20行
+    int pagenum = 0;     //当前页码
+    int pagetotal = 0;   //总页数
+
+    string s1 = "";
+    string s2 = "";
+    string s3 = "";
+    string s4 = "";
+    string s5 = "";
+    string s6 = "";
+    string s7 = "";
+    string s8 = "";
+    List<cls消息> lstsb = null;
+
+    try { pagenum = (int)TempData["pagenum"]; }
+    catch { }
+    try { pagetotal = (int)TempData["pagetotal"]; }
+    catch { }
+
+    try { s1 = (string)TempData["sbcx_t1"]; }
+    catch { }
+    try { s2 = (string)TempData["sbcx_t2"]; }
+    catch { }
+    try { s3 = (string)TempData["sbcx_t3"]; }
+    catch { }
+    try { s4 = (string)TempData["sbcx_t4"]; }
+    catch { }
+    try { s5 = (string)TempData["sbcx_t5"]; }
+    catch { }
+    try { s6 = (string)TempData["sbcx_t6"]; }
+    catch { }
+    try { s7 = (string)TempData["sbcx_t7"]; }
+    catch { }
+    try { s8 = (string)TempData["sbcx_t8"]; }
+    catch { }
+
+    try { lstsb = (List<cls消息>)TempData["pagedata"]; }
+    catch { }
+    if (lstsb == null)
+    {
+        lstsb = new List<cls消息>();
+    }
+    int i = 0;
+    string sdenglurenming = (string)TempData["dlzx"];
+
+    var wheresql = TempData["wheresql"] as string;
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+
+    <script type="text/javascript" src="~/Others/js/alert.js"></script>
+
+    <style>
+        .parent {
+            width: 100%;
+            height: 230px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .button {
+            font-size: 16px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: expanded;
+            color: #333333;
+        }
+        p.gaozhititle {
+            font-size: 18px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: black;
+            text-decoration: none;
+        }
+    </style>
+
+    <style type="text/css">
+        .pop-box {
+            /*弹出窗口后，弹出的DIV采用此CSS，保证置于最上层
+          z-index控制Z轴的坐标，数值越大，离用户越近
+        */
+            z-index: 9999999; /*这个数值要足够大，才能够显示在最上层*/
+            margin-bottom: 3px;
+            display: none;
+            position: absolute;
+        }
+
+        #bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            /*弹出窗口后，添加遮罩层，采用此CSS，将该层置于弹出DIV和页面层之间
+          z-index控制Z轴的坐标，数值越大，离用户越近  rgba(72, 74, 68, 0.46)
+        */
+            z-index: 1001;
+            background-color: #cfcdcd;
+            -moz-opacity: 0.7;
+            opacity: .70;
+            filter: alpha(opacity = 70);
+        }
+
+        td.style1 {
+            background-color: lightblue;
+            text-align: center;
+            color: gray;
+        }
+    </style>
+    <script type="text/javascript">
+        /*显示DIV*/
+        function popupDiv(div_id, banliid) {
+
+            var a = document.getElementById('txtbanliid')
+            a.value = banliid;
+
+
+            // 获取传入的DIV
+            var $div_obj = $("#" + div_id);
+            // 计算机屏幕高度
+            var windowWidth = $(window).width();
+            // 计算机屏幕长度
+            var windowHeight = $(window).height();
+            // 取得传入DIV的高度
+            var popupHeight = $div_obj.height();
+            // 取得传入DIV的长度
+            var popupWidth = $div_obj.width();
+
+            var documentWidth = $(document).width();
+            var documentHeight = $(document).height();
+
+            $("<div id='bg'></div>").width(documentWidth * 0.99)
+                    .height(documentHeight * 0.99).click(function () {
+                        //hideDiv(div_id);
+                    }).appendTo("body").fadeIn(200);
+
+            var left1 = windowWidth / 2 - popupWidth / 2;
+            var top1 = windowHeight / 2 - popupHeight / 2;
+            if (left1 < 0) left1 = 0;
+            if (top1 < 0) top1 = 0;
+            if (left1 < $(document).scrollLeft()) left1 = $(document).scrollLeft();
+            if (top1 < $(document).scrollTop()) top1 = $(document).scrollTop();
+            top1 = $(document).scrollTop() - 30;   //直接靠上对齐
+            $div_obj.css({
+                "position": "absloute"
+            }).animate({
+                left: left1,
+                top: top1,
+                opacity: "show"
+            }, "slow");
+        }
+
+        /*隐藏DIV*/
+        function hideDiv(div_id) {
+            $("#bg").remove();
+            $("#" + div_id).animate({
+                left: 0,
+                top: 0,
+                opacity: "hide"
+            }, "slow");
+        }
+
+
+
+    </script>
+
+</head>
+
+<body style="background-color: #2A293B;">
+
+    <input id="cx_dlz" value="@sdenglurenming" type="hidden">
+
+    <div id="popXQ" class="pop-box" style="width:840px;">
+        <div class="modal-dialog" style="width: 840px;">
+            <div class="modal-content" style="width: 840px;">
+
+                <input id="txtbanliid" type="hidden">
+
+                <div class="modal-header" style="width: 838px; background-color: #97bad1;">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popXQ');">×</button>
+                    <input id="lblXqbt" type="text" readonly="readonly" style="z-index: 0; border: none; width: 400px; background-color: #97bad1;color:white;">
+                </div>
+                <div id="ysxiangqing" class="panel-body" style="background-color: #FDFDFD; ">
+
+                </div>
+                <div class="modal-footer" style="background-color: #FDFDFD;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popXQ');">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <table id="worktable" style="width: 1024px; background-color: white; min-height: 100px; margin-right: auto; margin-left: auto; border: solid 2px lightgray;">
+        <tr>
+            <td style="height:50px;text-align:center;">
+                <li class="list-group-item">
+                    <br>
+                    <table style="width:100%;height:60px;">
+                        <tr style="width:100%">
+                            <td style="width: 100%; text-align: center; " colspan="2"><p class="gaozhititle">我的消息列表</p></td>
+                        </tr>
+                        <tr style="width:100%">
+                            <td style="width: 50%; text-align: center; ">
+                                <button id="butshuaxin1" class="btn btn-primary" type="button" style="width:100px;" onclick="quanyue();">全都已阅</button>
+                            </td>
+                            <td style="width: 50%; text-align: center; ">
+                                <button id="butguanbi1" class="btn btn-primary" type="button" style="width:100px;" onclick="guanbi();">关　闭</button>
+                            </td>
+                        </tr>
+                    </table>
+                </li>
+            </td>
+        </tr>
+        <tr>
+            <td style="height:100%;vertical-align:top;">
+                <div class="divbackground">
+                    <li class="list-group-item" style="background-color: #f2f6f7; display: none;">
+                        <table style="width: 100%; height: 60px; display:none;">
+                            <tr style="width: 100%; height: 50px;">
+                                <td style="text-align: left; width: 70px;">发送日期</td>
+                                <td style="text-align: center; "><input id="txt1" type="date" class="form-control" style="z-index:0;" value="@s1"></td>
+                                <td style="text-align: center; width: 70px; ">～</td>
+                                <td style="text-align: center; "><input id="txt2" type="date" class="form-control" style="z-index:0;" value="@s2"></td>
+                            </tr>
+                            <tr style="width: 100%; height: 50px;">
+                                <td style="text-align: left; width: 70px;">发送人</td>
+                                <td style="text-align: center; "><input id="txt3" type="text" class="form-control" style="z-index:0;" value="@s3"></td>
+                                <td style="text-align: right; width: 70px; ">消息内容&nbsp;</td>
+                                <td style="text-align: center; "><input id="txt4" type="text" class="form-control" style="z-index:0;" value="@s4"></td>
+                            </tr>
+                            <tr style="width: 100%; height: 50px;">
+                                <td style="text-align: left; width: 70px;">相关业务</td>
+                                <td style="text-align: center; "><input id="txt5" type="text" class="form-control" style="z-index:0;" value="@s5"></td>
+                                <td style="text-align: right; width: 70px; ">已阅&nbsp;</td>
+                                <td style="text-align: center; ">
+                                    <input type="hidden" id="txttempblzt" value="@s6">
+                                    <select id="txt6" class="form-control">
+                                        <option value=""></option>
+                                        <option value="是">是</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr style="width: 100%; height: 50px;">
+                                <td style="text-align: left; width: 70px;">接收人</td>
+                                @{
+                                    if (sdenglurenming == "")
+                                    {
+                                        <td style="text-align: center; "><input id="txt7" type="text" class="form-control" style="z-index:0;" value="@s7"></td>
+                                    }
+                                    else
+                                    {
+                                        <td style="text-align: center; "><input id="txt7" type="text" class="form-control" style="z-index:0;" value="@sdenglurenming" readonly="readonly"></td>
+                                    }
+                                }
+                                <td style="text-align: right; width: 70px; ">备注&nbsp;</td>
+                                <td style="text-align: center; "><input id="txt8" type="text" class="form-control" style="z-index:0;" value="@s8"></td>
+                            </tr>
+                        </table>
+                    </li>
+
+                    <li class="list-group-item" style="display:none;">
+                        <table style="width:100%;height:60px;display:none;">
+                            <tr style="width:100%">
+                                <td style="text-align: right; "></td>
+                                <td style="width: 180px; text-align: center; "><button id="butCx" class="btn btn-primary" type="button" style="width:100px;">查　询</button></td>
+                                <td style="text-align: left; "></td>
+                            </tr>
+                        </table>
+                    </li>
+
+
+
+                    <li class="list-group-item">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>发送人</th>
+                                    <th>发送日期</th>
+                                    <th>消息内容</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @{
+
+                                    for (i = 0; i < lstsb.Count; i++)
+                                    {
+                                        int xh = (pagenum - 1) * percount + i + 1;
+                                        <tr>
+                                            <td>@xh</td>
+                                            <td>@lstsb[i].发送人</td>
+                                            <td>@lstsb[i].发送时间.ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td>@lstsb[i].消息内容</td>
+                                            <td id="@lstsb[i].ID"><a href="javascript:banjie('@lstsb[i].ID');">设为已阅</a></td>
+                                            @*<td id="@lstsb[i].ID"><a href="javascript:showDetail('@lstsb[i].ID','@lstsb[i].类型');">详情</a></td>*@
+                                        </tr>
+                                    }
+
+                                }
+
+                            </tbody>
+                        </table>
+
+                        <br>
+                        <input id="dqy" type="hidden" value="@pagenum"><input id="zys" type="hidden" value="@pagetotal">
+
+                        <table style="width:100%;height:60px;">
+                            <tr style="width:100%">
+                                <td></td>
+                                <td style="text-align: center; width:360px;">
+
+                                    <div class="input-group">
+                                        <span class="input-group-addon">共 @pagetotal 页 / 第</span>
+                                        <input id="txtdangqianye" type="text" class="form-control" style="text-align:center;" value="@pagenum">
+                                        <span class="input-group-addon">页</span>
+                                        <span class="input-group-btn">
+                                            <button id="butsyy" class="btn btn-default" type="button" onclick="rollto(-1);">﹤</button>
+                                        </span>
+                                        <span class="input-group-btn">
+                                            <button id="butxyy" class="btn btn-default" type="button" onclick="rollto(1);">﹥</button>
+                                        </span>
+                                        <span class="input-group-btn">
+                                            <button id="butxy" class="btn btn-default" type="button" onclick="rollto(0);">Go</button>
+                                        </span>
+                                        <span class="input-group-btn">
+                                            <button id="buttoexcel" class="btn btn-default" type="button" onclick="Export2Excel();">导出</button>
+                                        </span>
+                                    </div>
+                                    <input id="wheresql" type="hidden" value="@wheresql">
+                                </td>
+                                <td></td>
+                            </tr>
+                        </table>
+
+                    </li>
+
+
+
+                </div>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
+
+
+<script type="text/javascript" language="javascript">
+    $(document).ready(function () {
+        $("#butCx").click(function () {
+            var lx = $("#cx_lx").val();
+            if (lx == "" || undefined || null) {
+                lx = "";
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: "/Home/MessageCx",
+                data: {
+                    t0: lx,
+                    t1: $("#txt1").val(),
+                    t2: $("#txt2").val(),
+                    t3: $("#txt3").val(),
+                    t4: $("#txt4").val(),
+                    t5: $("#txt5").val(),
+                    t6: $("#txt6").val(),
+                    t7: $("#txt7").val(),
+                    t8: $("#txt8").val()
+                },
+                dataType: "json",
+                success: function (sesponseTest) {
+                    var s = "../Home/MessageList?p=1&r=0";
+                    window.location = s;
+
+                }
+            });
+        });
+    });
+
+    function guanbi() {
+        window.location.href = "/Home/Index";
+    }
+
+    function shuaxin() {
+        var s = "../Home/MessageList?p=1&r=1";
+        window.location = s;
+    }
+
+    function rollto(intstep) {
+        var a1 = "1";
+        var a2 = "1";
+        var a = "1";
+        a1 = $("#dqy").val();
+        a2 = $("#zys").val();
+        a = $("#txtdangqianye").val();
+        if (a1 == "" || undefined || null) {
+            a1 = '1';
+        }
+        if (a2 == "" || undefined || null) {
+            a2 = '1';
+        }
+        if (a == "" || undefined || null) {
+            a = '1';
+        }
+        a = parseInt(a) + parseInt(intstep);
+
+        var lx = $("#cx_lx").val();
+        if (lx == "" || undefined || null) {
+            lx = "";
+        }
+
+        $("#txtdangqianye").val(a);
+
+        var s = "../Main/MessageList?p=" + a + "&r=0";
+        window.location = s;
+
+    }
+
+    function comboitemclick(txtid, txtvalue) {
+        var a = document.getElementById(txtid)
+        a.value = txtvalue;
+    }
+
+    function showDetail(strid, strlx) {
+        $("#ysxiangqing").load("/Home/MessageView", { "id": strid }, function () {
+            popupDiv('popXQ', strid);
+        });
+    }
+
+
+    //设置为已阅
+    function banjie(strid) {
+        $.ajax({
+            type: 'POST',
+            url: "/Home/HandleMessage",
+            data: {
+                xgID: strid,
+                xgyw: '设为已阅'
+            },
+            dataType: "json",
+            success: function (sesponseTest) {
+                switch (sesponseTest) {
+                    case 900001:
+                        //alert('a'+sesponseTest);
+                        return;
+                    default:
+                        var obj = document.getElementById(strid)
+                        obj.innerText = "已阅";
+                }
+            }
+        });
+    }
+
+
+    function quanyue()
+    {
+        var q = $("#cx_dlz").val();
+        if (q == "" || undefined || null) {
+            q = "";
+        }
+
+        var b1 = confirm("确认要将所有消息设置为已阅？");
+        if (b1) {
+            $.ajax({
+                type: 'POST',
+                url: "/Home/AllMessageReaded",
+                data: {
+                    loginrealname: q
+                },
+                dataType: "json",
+                success: function (sesponseTest) {
+                    switch (sesponseTest) {
+                        case 300001:
+                            //alert('a'+sesponseTest);
+                            return;
+                        default:
+                            alert('成功将所有消息设置为已阅。');
+                    }
+                }
+            });
+        }
+    }
+</script>
+
+
+<script type="text/javascript">
+
+    function Export2Excel() {
+        var q = $("#wheresql").val();
+        if (q == "" || undefined || null) {
+            q = " where 1=2";
+        }
+        q = 'select * from A消息 ' + q;
+        q = escape(q);
+        var s = "../Main/Export2Excel?w=" + q;
+        window.location = s;
+    }
+
+
+    document.getElementById("worktable").style.height = document.body.clientHeight + "px";
+</script>
+
+
+
