@@ -1,0 +1,151 @@
+﻿@model IEnumerable<applyvisa.Models.cls附件>
+
+@{
+    Layout = null;
+
+    string viewonly = ViewBag.viewonly as string;
+    
+    int i = 0;
+    string str1 = "";
+    string str2 = "";
+    string str3 = "";
+    string str4 = "";
+}
+
+
+<style>
+    p.gaozhititle {
+        font-size: 18px;
+        font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+        color: black;
+        text-decoration: none;
+    }
+
+    p.zhengwen {
+        font-size: 15px;
+        font-family: 宋体,微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+        color: black;
+        text-decoration: none;
+    }
+</style>
+
+
+ 
+
+
+    <input id="txtjzid" type="hidden" value="@ViewBag.JZID">
+
+
+
+    <table style="margin-right: auto; margin-left: auto; width: 940px;">
+    @*<tr>
+            <th style="width: 40px; text-align: center; font-size: 15px;">
+                序号
+            </th>
+            <th style="width: 300px; text-align: left; font-size: 15px;">
+                文件名
+            </th>
+            <th style="width: 150px; text-align: center; font-size: 15px;">
+
+            </th>
+            <th></th>
+        </tr>*@
+
+    @foreach (var item in Model)
+    {
+        i++;
+        str1 = ViewBag.sqrq;
+        str1 = Request.Url.GetLeftPart(UriPartial.Authority).ToString() + @"/Upfiles/" + str1.Substring(0, 4) + @"/" + str1 + @"/" + ((string)ViewBag.JZID).Trim() + @"/" + item.服务器文件名;
+        str2 = "climgs_" + i.ToString();
+        str3 = "inners_" + i.ToString();
+        str4 = "<img src='" + str1 + "' style='width:100%' />";
+
+        <tr id="@item.ID.ToString()">
+            <td style="width: 1%; height: 30px; text-align: center;">
+                @*@i*@
+            </td>
+            <td style="width:90%; text-align: left;font-size:13px;">
+                <a href="@str1" target="_blank">@Html.DisplayFor(modelItem => item.服务器文件名) </a>
+            </td>
+            <td style="width: 9%; text-align: right;">
+                @{
+                    if (viewonly == "0")
+                    {
+                        <input type="button" class="btn btn-warning" style="height: 27px; font-size: 13px;" value="删除" id="butsc" onclick="return shanchu(this,'@item.ID.ToString()');">
+                    }
+                }
+
+            </td>
+        </tr>
+    }
+
+</table>
+
+
+
+
+
+    <script type="text/javascript" src="~/Others/js/alert.js"></script>
+    <script type="text/javascript" src="~/Others/js/confirm.js"></script>
+    <script language="javascript" type="text/javascript">
+        function shanchu(obj, sid) {
+            if (document.documentElement.clientWidth < 700) {
+                var b1 = confirm("确实要删除该附件？");
+                if (b1) {
+                    $.ajax({
+                        type: 'POST',
+                        url: "/Main/DelMaterial",
+                        data: {
+                            JZID: $("#txtjzid").val(),
+                            CLID: sid
+                        },
+                        dataType: "json",
+                        success: function (sesponseTest) {
+                            if (sesponseTest == 123456789) {
+                                //alert('删除成功，点“查看已经上传成功的材料”刷新列表。');
+                                var tr = obj.parentNode.parentNode;
+                                var tbody = tr.parentNode;
+                                tbody.removeChild(tr);
+                            }
+                        }
+                    });
+
+                    return true;
+                }
+            }
+            else {
+                zdconfirm('询问', '确实要删除该附件？', function (re) {
+                    if (re) {
+                        $.ajax({
+                            type: 'POST',
+                            url: "/Main/DelMaterial",
+                            data: {
+                                JZID: $("#txtjzid").val(),
+                                CLID: sid
+                            },
+                            dataType: "json",
+                            success: function (sesponseTest) {
+                                if (sesponseTest == 123456789) {
+                                    //alert('删除成功，点“查看已经上传成功的材料”刷新列表。');
+                                    var tr = obj.parentNode.parentNode;
+                                    var tbody = tr.parentNode;
+                                    tbody.removeChild(tr);
+                                    ////只剩行首时删除表格
+                                    //if (tbody.rows.length == 1) {
+                                    //    tbody.parentNode.removeChild(tbody);
+                                    //}
+
+                                }
+                            }
+                        });
+
+
+                        return true;
+                    }
+                });
+            }
+
+            return false;
+        }
+
+    </script>

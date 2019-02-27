@@ -1,0 +1,168 @@
+﻿@model IEnumerable<applyvisa.Models.cls办理过程>
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+
+    <style>
+        p.gaozhititle {
+            font-size: 18px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: black;
+            text-decoration: none;
+        }
+
+        #countrycolor {
+            color: #FF7F00;
+            text-wrap: none;
+        }
+
+        p.xingming {
+            font-size: 15px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: white;
+            background-color: #280581;
+            height: 35px;
+            vertical-align: middle;
+            display: block;
+            line-height: 35px;
+            text-align: left;
+        }
+
+        p.xiangqing {
+            font-size: 13px;
+            /*font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;*/
+            color: black;
+            background-color: #d6ddfb;
+            height: 100%;
+        }
+
+        .parent {
+            width: 100%;
+            height: 230px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .children {
+            display: inline-block;
+            width: 150px;
+            height: 150px;
+        }
+
+        .button {
+            font-size: 16px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: expanded;
+            color: #333333;
+        }
+
+        * + html .children {
+            display: inline;
+            zoom: 1;
+        }
+
+        * html .children {
+            display: inline;
+            zoom: 1;
+        }
+    </style>
+    <style type="text/css">
+        .pop-box {
+            /*弹出窗口后，弹出的DIV采用此CSS，保证置于最上层
+          z-index控制Z轴的坐标，数值越大，离用户越近
+        */
+            z-index: 9999999; /*这个数值要足够大，才能够显示在最上层*/
+            margin-bottom: 3px;
+            display: none;
+            position: absolute;
+        }
+
+        #bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            /*弹出窗口后，添加遮罩层，采用此CSS，将该层置于弹出DIV和页面层之间
+          z-index控制Z轴的坐标，数值越大，离用户越近  rgba(72, 74, 68, 0.46)
+        */
+            z-index: 1001;
+            background-color: #cfcdcd;
+            -moz-opacity: 0.7;
+            opacity: .70;
+            filter: alpha(opacity = 70);
+        }
+
+        td.style1 {
+            background-color: lightblue;
+            text-align: center;
+            color: gray;
+        }
+
+        td.style2 {
+            font-size: 13px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: normal;
+        }
+    </style>
+
+</head>
+
+<body style="background-color: #2A293B;">
+
+
+    <input id="txtjzid" type="hidden" value="@ViewBag.JZID">
+
+
+
+    <table style="margin-right: auto; margin-left: auto; width: 800px; font-size: 13px; font-stretch: normal; font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;">
+        <tr style="border-bottom: solid 1px lightgray; border-top: solid 1px lightgray;">
+            <th style="width: 50px; text-align: center; border-right: solid 1px lightgray;">
+                处理人
+            </th>
+            <th style="width: 150px; text-align: center; border-right: solid 1px lightgray;">
+                处理时间
+            </th>
+            <th style="width: 80px; text-align: center; border-right: solid 1px lightgray;">
+                处理类型
+            </th>
+            <th style="width: 80px; text-align: center; border-right: solid 1px lightgray;">
+                处理结果
+            </th>
+            <th style="width: auto; text-align: center; ">
+                处理意见
+            </th>
+        </tr>
+
+        @foreach (var item in Model)
+{
+    <tr id="@item.ID.ToString()" style="border-bottom: solid 1px lightgray; ">
+        <td style="width: 50px; height: 30px; text-align: center; border-right: solid 1px lightgray;">
+            @item.处理人
+        </td>
+        <td style="width: 110px; text-align: center; border-right: solid 1px lightgray;">
+            @item.处理日期.ToString("yyyy-MM-dd HH:mm")
+        </td>
+        <td style="width: 80px; text-align: center; border-right: solid 1px lightgray;">
+            @item.相关业务
+        </td>
+        <td style="width: 80px; text-align: center; border-right: solid 1px lightgray;">
+            @item.处理结果
+        </td>
+        <td style="width: auto; text-align: left; ">
+            @item.处理意见
+        </td>
+    </tr>
+}
+
+    </table>
+
+</body>
+</html>
+

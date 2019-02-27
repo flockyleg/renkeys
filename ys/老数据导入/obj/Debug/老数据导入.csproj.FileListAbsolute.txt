@@ -1,0 +1,8 @@
+E:\人科预算系统\源程序\老数据导入\obj\Debug\老数据导入.Form1.resources
+E:\人科预算系统\源程序\老数据导入\obj\Debug\老数据导入.Properties.Resources.resources
+E:\人科预算系统\源程序\老数据导入\obj\Debug\老数据导入.csproj.GenerateResource.Cache
+E:\人科预算系统\源程序\老数据导入\bin\Debug\老数据导入.exe
+E:\人科预算系统\源程序\老数据导入\bin\Debug\老数据导入.pdb
+E:\人科预算系统\源程序\老数据导入\obj\Debug\老数据导入.exe
+E:\人科预算系统\源程序\老数据导入\obj\Debug\老数据导入.pdb
+E:\人科预算系统\源程序\老数据导入\obj\Debug\老数据导入.csprojResolveAssemblyReference.cache

@@ -1,0 +1,441 @@
+﻿@using applyvisa.Models;
+
+@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "中证通订单实际收支输入清单";
+
+    List<cls中证通订单> lstsb = ViewBag.ysds as List<cls中证通订单>;
+    int i = 0;
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+
+    <script type="text/javascript" src="~/Others/js/alert.js"></script>
+    <script type="text/javascript" src="~/Others/js/cookie.js"></script>
+
+    <style>
+        p.gaozhititle {
+            font-size: 18px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: black;
+            text-decoration: none;
+        }
+        .parent {
+            width: 100%;
+            height: 230px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .button {
+            font-size: 16px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: expanded;
+            color: #333333;
+        }
+    </style>
+
+    <style type="text/css">
+        .pop-box {
+            /*弹出窗口后，弹出的DIV采用此CSS，保证置于最上层
+          z-index控制Z轴的坐标，数值越大，离用户越近
+        */
+            z-index: 9999999; /*这个数值要足够大，才能够显示在最上层*/
+            margin-bottom: 3px;
+            display: none;
+            position: absolute;
+        }
+
+        #bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            /*弹出窗口后，添加遮罩层，采用此CSS，将该层置于弹出DIV和页面层之间
+          z-index控制Z轴的坐标，数值越大，离用户越近  rgba(72, 74, 68, 0.46)
+        */
+            z-index: 1001;
+            background-color: #cfcdcd;
+            -moz-opacity: 0.7;
+            opacity: .70;
+            filter: alpha(opacity = 70);
+        }
+
+        td.style1 {
+            background-color: lightblue;
+            text-align: center;
+            color: gray;
+        }
+    </style>
+    <script type="text/javascript">
+        /*显示DIV*/
+        function popupDiv(div_id, banliid) {
+
+            var a = document.getElementById('txtbanliid')
+            a.value = banliid;
+
+
+            // 获取传入的DIV
+            var $div_obj = $("#" + div_id);
+            // 计算机屏幕高度
+            var windowWidth = $(window).width();
+            // 计算机屏幕长度
+            var windowHeight = $(window).height();
+            // 取得传入DIV的高度
+            var popupHeight = $div_obj.height();
+            // 取得传入DIV的长度
+            var popupWidth = $div_obj.width();
+
+            var documentWidth = $(document).width();
+            var documentHeight = $(document).height();
+
+            $("<div id='bg'></div>").width(documentWidth * 0.99)
+                    .height(documentHeight * 0.99).click(function () {
+                        //hideDiv(div_id);
+                    }).appendTo("body").fadeIn(200);
+
+            var left1 = windowWidth / 2 - popupWidth / 2;
+            var top1 = windowHeight / 2 - popupHeight / 2;
+            if (left1 < 0) left1 = 0;
+            if (top1 < 0) top1 = 0;
+            if (left1 < $(document).scrollLeft()) left1 = $(document).scrollLeft();
+            if (top1 < $(document).scrollTop()) top1 = $(document).scrollTop();
+            top1 = $(document).scrollTop() - 30;   //直接靠上对齐
+            $div_obj.css({
+                "position": "absloute"
+            }).animate({
+                left: left1,
+                top: top1,
+                opacity: "show"
+            }, "slow");
+        }
+
+        /*隐藏DIV*/
+        function hideDiv(div_id) {
+            $("#bg").remove();
+            $("#" + div_id).animate({
+                left: 0,
+                top: 0,
+                opacity: "hide"
+            }, "slow");
+        }
+
+
+
+    </script>
+
+</head>
+
+<body style="background-color: #2A293B;">
+
+    <div id="popXQ" class="pop-box" style="width:840px;">
+        <div class="modal-dialog" style="width: 840px;">
+            <div class="modal-content" style="width: 840px;">
+
+                <input id="txtbanliid" type="hidden">
+
+                <div class="modal-header" style="width: 838px; background-color: #97bad1;">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popXQ');">×</button>
+                    <input id="lblXqbt" type="text" readonly="readonly" style="z-index: 0; border: none; width: 400px; background-color: #97bad1;color:white;">
+                </div>
+                <div id="ysxiangqing" class="panel-body" style="background-color: #FDFDFD; ">
+
+                </div>
+                <div class="modal-footer" style="background-color: #FDFDFD;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popXQ');">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div id="popSZ" class="pop-box">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popSZ');">×</button>
+                    <h4 id="lblsz" class="modal-title">实际收支</h4><input id="txtszlx" type="hidden">
+                </div>
+                <div class="panel-body" style="height: 100%;">
+                    <div class="parent" style="text-align: left; height: auto;">
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszf" style="border:none;background-color:white;">收支方　　　</span>
+                            <input id="txtszf" type="text" class="form-control">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszlx1" style="border:none;background-color:white;">类型　　　　</span>
+                            <select id="txtszlx1" class="form-control">
+                                <option value=" "></option>
+                                <option value="激励">激励</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszje" style="border:none;background-color:white;">实际收支金额</span>
+                            <input id="txtszje" type="text" class="form-control">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszrq" style="border:none;background-color:white;">实际收支日期</span>
+                            <input id="txtszrq" type="date" class="form-control">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="lblszbz" style="border:none;background-color:white;">备注　　　　</span>
+                            <input id="txtszbz" type="text" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input id="lblMsg1" type="text" readonly="readonly" style="border-style:none;color:red;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popSZ');">　取　消　</button>
+                    <button id="butSzbc" type="button" class="btn btn-primary">　保　存　</button>
+                    <input type="hidden" id="txtszid">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <table id="worktable" style="width: 1024px; background-color: white; min-height: 400px; margin-right: auto; margin-left: auto;">
+        <tr>
+            <td style="height:100%;vertical-align:top;">
+                <div class="divbackground">
+                    
+                    <li class="list-group-item">
+                        <table style="width:100%;height:60px;">
+                            <tr style="width:100%">
+                                <td colspan="3" style="text-align:center;height:50px;">
+                                    <p class="gaozhititle">实际收支输入（多订单自动摊分）</p>
+                                </td>
+                            </tr>
+                            <tr style="width:100%">
+                                <td style="text-align: right; "><button id="butnewsjsz1" class="btn btn-primary" type="button" style="width:100px;">实际收入</button></td>
+                                <td style="width: 200px; text-align: center; "><button id="butnewsjsz2" class="btn btn-primary" type="button" style="width:100px;">实际支出</button></td>
+                                <td style="text-align: left; "><button class="btn btn-primary" type="button" style="width:100px;" onclick="previousstep();">关　闭</button></td>
+                            </tr>
+                        </table>
+                    </li>
+
+                    <li class="list-group-item">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>订单号</th>
+                                    <th>当事人</th>
+                                    <th>订单日期</th>
+                                    <th>公证事项</th>
+                                    <th>加急</th>
+                                    <th>预收</th>
+                                    <th>预支</th>
+                                    <th>实收</th>
+                                    <th>实支</th>
+                                    <th>承办公证处</th>
+                                    <th>本次摊分额</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @{
+
+                                    for (i = 0; i < lstsb.Count; i++)
+                                    {
+                                        int xh = i + 1;
+                                        string strp = "pi_" + lstsb[i].ID.ToString();
+                                        <tr>
+                                            <td>@xh</td>
+                                            <td><a href="javascript:showDetail('@lstsb[i].ID');">@lstsb[i].订单号</a></td>
+                                            <td>@lstsb[i].当事人</td>
+                                            <td>@lstsb[i].订单日期.ToString("yyyy-MM-dd")</td>
+                                            <td>@lstsb[i].公证事项</td>
+                                            <td>@lstsb[i].是否加急)</td>
+                                            <td>@lstsb[i].管理_预算收入金额</td>
+                                            <td>@lstsb[i].管理_预算支出金额</td>
+                                            <td>@lstsb[i].管理_实际收入金额</td>
+                                            <td>@lstsb[i].管理_实际支出金额</td>
+                                            <td>@lstsb[i].承办公证处</td>
+                                            <td style="color:red;">@lstsb[i].管理_1</td>
+                                        </tr>
+                                    }
+
+                                }
+
+                            </tbody>
+                        </table>
+
+
+                    </li>
+
+
+
+                </div>
+            </td>
+        </tr>
+    </table>
+
+
+</body>
+</html>
+
+
+<script type="text/javascript" language="javascript">
+    function showDetail(strid) {
+        $("#ysxiangqing").load("/Zzt/OrderView", { "id": strid }, function () {
+            $("#lblXqbt").val(' 中证通订单浏览');
+            popupDiv('popXQ', strid);
+        });
+    }
+
+
+    //实际收入新增
+    $(document).ready(function () {
+        $("#butnewsjsz1").click(function () {
+            var a1 = document.getElementById("lblsz");
+            a1.innerHTML = "实际收入";
+            var a2 = document.getElementById("lblszf");
+            a2.innerHTML = "付款方　　　";
+            var a3 = document.getElementById("lblszje");
+            a3.innerHTML = "实际收入金额";
+            var a4 = document.getElementById("lblszrq");
+            a4.innerHTML = "实际收款日期";
+
+            $("#txtszlx").val('收入');
+            $("#lblMsg1").val('');
+            $("#txtszf").val('');
+            $("#txtszje").val('');
+            $("#txtszrq").val('');
+            $("#txtszbz").val('');
+            $.ajax({
+                type: 'POST',
+                url: "/Home/newguid",
+                data: {},
+                dataType: "text",
+                success: function (sesponseTest) {
+                    $("#txtszid").val(sesponseTest);
+                    popupDiv('popSZ')
+                }
+            });
+        });
+    });
+    //实际支出新增
+    $(document).ready(function () {
+        $("#butnewsjsz2").click(function () {
+            var a1 = document.getElementById("lblsz");
+            a1.innerHTML = "实际支出";
+            var a2 = document.getElementById("lblszf");
+            a2.innerHTML = "收款方　　　";
+            var a3 = document.getElementById("lblszje");
+            a3.innerHTML = "实际支出金额";
+            var a4 = document.getElementById("lblszrq");
+            a4.innerHTML = "实际付款日期";
+
+            $("#txtszlx").val('支出');
+            $("#lblMsg1").val('');
+            $("#txtszf").val('');
+            $("#txtszje").val('');
+            $("#txtszrq").val('');
+            $("#txtszbz").val('');
+            $.ajax({
+                type: 'POST',
+                url: "/Home/newguid",
+                data: {},
+                dataType: "text",
+                success: function (sesponseTest) {
+                    $("#txtszid").val(sesponseTest);
+                    popupDiv('popSZ')
+                }
+            });
+        });
+    });
+
+    //收支保存
+    $(document).ready(function () {
+        $("#butSzbc").click(function () {
+            var szlx = $("#txtszlx").val();
+            if (szlx == "" || undefined || null) {
+                $("#lblMsg1").val('未知的收支类型（收入/支出）。');
+                return false;
+            }
+
+            var szf = $("#txtszf").val();
+            if (szf == "" || undefined || null) {
+                $("#lblMsg1").val('请输入付款/收款方。');
+                return false;
+            }
+            var szje = $("#txtszje").val();
+            if (szje == "" || undefined || null) {
+                $("#lblMsg1").val('请输入金额。');
+                return false;
+            }
+            var szrq = $("#txtszrq").val();
+            if (szrq == "" || undefined || null) {
+                $("#lblMsg1").val('请输入日期。');
+                return false;
+            }
+            var szbz = $("#txtszbz").val();
+            if (szbz == "" || undefined || null) {
+                szbz = "";
+            }
+            var szlx1 = $("#txtszlx1").val();
+            if (szlx1 == "" || undefined || null) {
+                szlx1 = "";
+            }
+            var sid = $("#txtszid").val();
+            var sjzid = $("#txtjzid").val();
+
+            $.ajax({
+                type: 'POST',
+                url: "/Zzt/SaveSjSzBatch",
+                data: {
+                    szlx: szlx,
+                    szf: szf,
+                    szje: szje,
+                    szrq: szrq,
+                    szbz: szbz,
+                    szlx1: szlx1
+                },
+                dataType: "json",
+                success: function (sesponseTest) {
+                    switch (sesponseTest) {
+                        case 300001:
+                            $("#lblMsg1").val('未知的订单记录，不能保存收入/支出。');
+                            return false;
+                        case 300005:
+                            $("#lblMsg1").val('不能保存收入/支出信息到数据库。');
+                            return false;
+                        default:
+                            hideDiv('popSZ');
+                            
+                            //alert(sesponseTest);
+                            //windows.location.reload();
+                            window.location = "../Zzt/BatchActual";
+                            break;
+                    }
+
+                }
+            });
+        });
+    });
+
+
+
+
+    function previousstep() {
+        window.opener = null; window.open('', '_self'); window.close();
+    }
+
+    function comboitemclick(txtid, txtvalue) {
+        var a = document.getElementById(txtid)
+        a.value = txtvalue;
+    }
+
+
+    document.getElementById("worktable").style.height = document.body.clientHeight + "px";
+</script>
+
+
+

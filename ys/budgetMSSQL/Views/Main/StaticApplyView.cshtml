@@ -1,0 +1,897 @@
+﻿@using applyvisa.Models;
+
+@{
+    Layout = null;
+    ViewBag.Title = "固定预算记录";
+
+    var acc_yusuan = ViewBag.acc_yusuan as cls预算单;
+    int i = 0;
+    var stryslx = "固 定 预 算";
+    if (acc_yusuan.类型 == 1)
+    {
+        stryslx = "项 目 预 算";
+        ViewBag.Title = "项目预算记录";
+    }
+    string str1 = "";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+
+    <style>
+        p.gaozhititle {
+            font-size: 18px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: black;
+            text-decoration: none;
+        }
+
+        #countrycolor {
+            color: #FF7F00;
+            text-wrap: none;
+        }
+
+        p.xingming {
+            font-size: 15px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            color: white;
+            background-color: #280581;
+            height: 35px;
+            vertical-align: middle;
+            display: block;
+            line-height: 35px;
+            text-align: left;
+        }
+
+        p.xiangqing {
+            font-size: 13px;
+            /*font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;*/
+            color: black;
+            background-color: #d6ddfb;
+            height: 100%;
+        }
+
+        .parent {
+            width: 100%;
+            height: 230px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .children {
+            display: inline-block;
+            width: 150px;
+            height: 150px;
+        }
+
+        .button {
+            font-size: 16px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: expanded;
+            color: #333333;
+        }
+
+        * + html .children {
+            display: inline;
+            zoom: 1;
+        }
+
+        * html .children {
+            display: inline;
+            zoom: 1;
+        }
+    </style>
+    <style type="text/css">
+        .pop-box {
+            /*弹出窗口后，弹出的DIV采用此CSS，保证置于最上层
+          z-index控制Z轴的坐标，数值越大，离用户越近
+        */
+            z-index: 9999999; /*这个数值要足够大，才能够显示在最上层*/
+            margin-bottom: 3px;
+            display: none;
+            position: absolute;
+        }
+
+        #bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            /*弹出窗口后，添加遮罩层，采用此CSS，将该层置于弹出DIV和页面层之间
+          z-index控制Z轴的坐标，数值越大，离用户越近  rgba(72, 74, 68, 0.46)
+        */
+            z-index: 1001;
+            background-color: #cfcdcd;
+            -moz-opacity: 0.7;
+            opacity: .70;
+            filter: alpha(opacity = 70);
+        }
+
+        td.style1 {
+            background-color: lightblue;
+            text-align: center;
+            color: gray;
+        }
+    </style>
+
+</head>
+
+<body style="background-color: #2A293B;">
+
+    <input type="hidden" id="txtjzid" value="@acc_yusuan.ID.ToString()">
+    <input type="hidden" id="txtgl_lx" value="@acc_yusuan.类型.ToString()">
+    <input type="hidden" id="iszztdd" value="@acc_yusuan.是否中证通订单">
+
+    <table id="worktable" style="width: 800px; background-color: white; min-height: 100px; margin-right: auto; margin-left: auto; border: solid 2px lightgray;">
+        <tr style="border-bottom:solid 1px lightgray;">
+            <td colspan="2" style="vertical-align:central;height:10px;">
+                <table style="width:100%;height:10px;">
+                    <tr style="border-bottom:solid 1px lightgray;">
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">预算编号</span>
+                        </td>
+                        <td style="width: 170px; border-right: solid 1px lightgray;">
+                            <input id="txtysbh" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " value="@acc_yusuan.预算编号">
+                        </td>
+
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">预算名称</span>
+                        </td>
+                        <td style="width: 170px; border-right: solid 1px lightgray; ">
+                            <input id="txtysmc" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " value="@acc_yusuan.预算名称">
+                        </td>
+
+                        <td style="width: 80px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">成本中心编号</span>
+                        </td>
+                        <td style="width: 168px; ">
+                            <input id="txtcbzxbh" type="text" readonly="readonly" style="width: 168px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " value="@acc_yusuan.成本中心编号">
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+                    <tr style="border-bottom:solid 1px lightgray;" id="tr_ywlx">
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">业务类型</span>
+                        </td>
+                        <td style="width: 170px; border-right: solid 1px lightgray;">
+                            <input id="txtysywlx" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px;" value="@acc_yusuan.业务类型">
+                        </td>
+
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">销　　售</span>
+                        </td>
+                        <td colspan="3" style="width: 170px;">
+                            <input id="txtysxs" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px;" value="@acc_yusuan.销售">
+                        </td>
+
+                        <td style="width:20px;"> </td>
+                    </tr>
+                    <tr style="border-bottom:solid 1px lightgray;">
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">预算说明</span>
+                        </td>
+                        <td colspan="5" style="width:auto;">
+                            <textarea id="txtyssm" readonly="readonly" style="z-index: 0; height: 40px; width: 700px; border: none; margin-left: 5px; font-size: 13px; ">@acc_yusuan.预算说明</textarea>
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+                    <tr style="border-bottom:solid 1px lightgray;">
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">申 请 人</span>
+                        </td>
+                        <td style="width: 170px; border-right: solid 1px lightgray;">
+                            <input id="txtyssqr" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px;" value="@acc_yusuan.申请人">
+                        </td>
+
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">申请日期</span>
+                        </td>
+                        <td colspan="3" style="width: 170px;">
+                            <input id="txtyssqrq" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px;" value="@acc_yusuan.申请日期.ToString("yyyy-MM-dd")">
+                        </td>
+
+                        <td style="width:20px;"> </td>
+                    </tr>
+
+                    <tr style="border-bottom:solid 1px lightgray;">
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">审 批 人</span>
+                        </td>
+                        <td style="width: 170px; border-right: solid 1px lightgray;">
+                            <input id="txtyspr" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px;" value="@acc_yusuan.审批人">
+                        </td>
+
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">审批日期</span>
+                        </td>
+                        <td style="width: 170px; border-right: solid 1px lightgray;">
+                            @{
+                                str1 = "";
+                                if (acc_yusuan.审批日期 < DateTime.Parse("2000-01-01"))
+                                {
+                                    str1 = "";
+                                }
+                                else
+                                {
+                                    str1 = acc_yusuan.审批日期.ToString("yyyy-MM-dd");
+                                }
+                            }
+                            <input id="txtsprq" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px;" value="@str1">
+                        </td>
+
+                        <td style="width: 80px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">审批结果</span>
+                        </td>
+                        <td style="width: 168px">
+                            <input id="txtspjg" type="text" readonly="readonly" style="width: 168px; height: 30px; margin-left: 5px; border: none; font-size: 13px;" value="@acc_yusuan.审批结果">
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+                    <tr style="border-bottom:solid 1px lightgray;">
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">审批意见</span>
+                        </td>
+                        <td colspan="5" style="width:auto;">
+                            <input id="txtspyj" readonly="readonly" style="z-index: 0; width: 700px; border: none; margin-left: 5px; font-size: 13px; " value="@acc_yusuan.审批意见">
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+
+                    <tr style="border-bottom:solid 1px lightgray;">
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">核 定 人</span>
+                        </td>
+                        <td style="width: 170px; border-right: solid 1px lightgray;">
+                            <input id="txtyhdr" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px;" value="@acc_yusuan.核定人">
+                        </td>
+
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">核定日期</span>
+                        </td>
+                        <td style="width: 170px; border-right: solid 1px lightgray;">
+                            @{
+                                str1 = "";
+                                if (acc_yusuan.核定日期 < DateTime.Parse("2000-01-01"))
+                                {
+                                    str1 = "";
+                                }
+                                else
+                                {
+                                    str1 = acc_yusuan.核定日期.ToString("yyyy-MM-dd");
+                                }
+                            }
+                            <input id="txthdrq" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px;" value="@str1">
+                        </td>
+
+                        <td style="width: 80px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">核定结果</span>
+                        </td>
+                        <td style="width: 168px">
+                            <input id="txthdjg" type="text" readonly="readonly" style="width: 168px; height: 30px; margin-left: 5px; border: none; font-size: 13px;" value="@acc_yusuan.核定结果">
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+                    <tr style="border-bottom:solid 1px lightgray;">
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">核定意见</span>
+                        </td>
+                        <td colspan="5" style="width:auto;">
+                            <input id="txthdyj" readonly="readonly" style="z-index: 0; width: 700px; border: none; margin-left: 5px; font-size: 13px; " value="@acc_yusuan.核定意见">
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 80px; height: 20px;text-align:center; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">附　　件</span>
+                        </td>
+                        <td colspan="5" style="width:auto;">
+                            <div id="txtfj" style="width:100px;">
+
+                            </div>
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+
+        @*中证通订单信息*@
+        <tr id="zztddxx" style="border-bottom:solid 1px lightgray;">
+            <td colspan="2" style="vertical-align:central;height:10px;">
+
+                <table style="width:100%;height:10px;">
+                    <tr style="border-bottom:solid 1px lightgray;">
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">子订单号</span>
+                        </td>
+                        <td style="width: 420px; border-right: solid 1px lightgray; " colspan="3">
+                            <input id="txtzddh" type="text" readonly="readonly" style="width: 420px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " value="@acc_yusuan.子订单号">
+                        </td>
+
+                        <td style="width: 80px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">订单日期</span>
+                        </td>
+                        <td style="width: 168px; ">
+                            <input id="txtcbzxbh" type="text" readonly="readonly" style="width: 168px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " value="@acc_yusuan.订单日期.ToString("yyyy-MM-dd")">
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+                    <tr style="border-bottom:solid 1px lightgray;">
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">当事人</span>
+                        </td>
+                        <td style="width: 170px; border-right: solid 1px lightgray;">
+                            <input id="txtysbh" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " value="@acc_yusuan.当事人">
+                        </td>
+
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">证件号</span>
+                        </td>
+                        <td style="width: 170px; border-right: solid 1px lightgray; ">
+                            <input id="txtysmc" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " value="@acc_yusuan.当事人证件号">
+                        </td>
+
+                        <td style="width: 80px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">公证事项</span>
+                        </td>
+                        <td style="width: 168px; ">
+                            <input id="txtcbzxbh" type="text" readonly="readonly" style="width: 168px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " value="@acc_yusuan.公证事项">
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+                    <tr style="border-bottom:solid 1px lightgray;">
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">用地</span>
+                        </td>
+                        <td style="width: 170px; border-right: solid 1px lightgray;">
+                            <input id="txtysbh" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " value="@acc_yusuan.用地">
+                        </td>
+
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">语种</span>
+                        </td>
+                        <td style="width: 170px; border-right: solid 1px lightgray; ">
+                            <input id="txtysmc" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " value="@acc_yusuan.语种">
+                        </td>
+
+                        <td style="width: 80px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">用途</span>
+                        </td>
+                        <td style="width: 168px; ">
+                            <input id="txtyt" type="text" readonly="readonly" style="width: 168px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " value="@acc_yusuan.用途">
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+                    <tr style="border-bottom:solid 1px lightgray;">
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">线上线下</span>
+                        </td>
+                        <td style="width: 170px; border-right: solid 1px lightgray;">
+                            <input id="txtxsxx" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " value="@acc_yusuan.线上线下">
+                        </td>
+
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">加急</span>
+                        </td>
+                        <td style="width: 170px; border-right: solid 1px lightgray; ">
+                            <input id="txtsfjj" type="text" readonly="readonly" style="width: 170px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " value="@acc_yusuan.是否加急">
+                        </td>
+
+                        <td style="width: 80px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">承办公证处</span>
+                        </td>
+                        <td style="width: 168px; ">
+                            <input id="txtcbzxbh" type="text" readonly="readonly" style="width: 168px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " value="@acc_yusuan.承办公证处">
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 80px; height: 20px; border-right: solid 1px lightgray;">
+                            <span class="input-group-addon" style="border: none; background-color:white;">渠道</span>
+                        </td>
+                        <td style="width: 668px; " colspan="5">
+                            <input id="txtqd" type="text" readonly="readonly" style="width: 668px; height: 30px; margin-left: 5px; border: none; font-size: 13px; " value="@acc_yusuan.渠道">
+                        </td>
+                        <td style="width:20px;"> </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2" style="vertical-align: top; height: 10px;">
+                <table id="tableyjsr" style="width: 100%; text-align: center;">
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td colspan="8" style="width: 100%;height:10px;"></td>
+                    </tr>
+                    <tr style="background-color: #FAFAFA; border-bottom: solid 1px lightgray;">
+                        <td colspan="8" style="width: auto;height:34px;">
+                            <p style="font-size:15px;">预　算　收　入</p>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td style="height: 25px; width: 120px; font-size: 13px; border-right: solid 1px lightgray;">
+                            付款方
+                        </td>
+                        <td style="width: 40px; font-size: 13px; border-right: solid 1px lightgray;">
+                            类型
+                        </td>
+                        <td style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">
+                            预算收入金额
+                        </td>
+                        <td style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">
+                            预算收款日期
+                        </td>
+                        <td style="width: 80px; font-size: 13px; border-right: solid 1px lightgray;">
+                            销项税额
+                        </td>
+                        <td style="width: 80px; font-size: 13px; border-right: solid 1px lightgray;">
+                            销项税率
+                        </td>
+                        <td style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">
+                            销项发票种类
+                        </td>
+                        <td style="width: 130px; font-size: 13px;">
+                            备注
+                        </td>
+                    </tr>
+                    @{
+                        for (i = 0; i < acc_yusuan.预算收支.Count; i++)
+                        {
+                            if (acc_yusuan.预算收支[i].收支 == "收入")
+                            {
+                                string tmpa1 = "tableyssr_row" + i.ToString() + "col0";
+                                string tmpa2 = "tableyssr_row" + i.ToString() + "col1";
+                                string tmpa3 = "tableyssr_row" + i.ToString() + "col2";
+                                string tmpa4 = "tableyssr_row" + i.ToString() + "col3";
+                                string tmpa5 = "tableyssr_row" + i.ToString() + "col4";
+                                string tmpa6 = "tableyssr_row" + i.ToString() + "col5";
+                                string tmpa7 = "tableyssr_row" + i.ToString() + "col6";
+                                string tmpa8 = "tableyssr_row" + i.ToString() + "col7";
+                                <tr id="@acc_yusuan.预算收支[i].ID.ToString()" style="border-bottom: solid 1px lightgray;">
+                                    <td id="@tmpa1" style="height: 25px; width: 120px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].借贷方</td>
+                                    <td id="@tmpa2" style="width: 40px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].类型</td>
+                                    <td id="@tmpa3" style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].金额.ToString("C")</td>
+                                    <td id="@tmpa4" style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].日期.ToString("yyyy-MM-dd")</td>
+                                    <td id="@tmpa6" style="width: 80px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].收付税额.ToString("C")</td>
+                                    <td id="@tmpa7" style="width: 80px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].收付税率.ToString()</td>
+                                    <td id="@tmpa8" style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].收付发票种类</td>
+                                    <td id="@tmpa5" style="width: 130px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].备注</td>
+                                </tr>
+                            }
+                        }
+                    }
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2" style="vertical-align: top; height: 10px;">
+                <table id="tableyjzc" style="width: 100%; text-align: center;">
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td colspan="8" style="width: 100%;height:10px;"></td>
+                    </tr>
+                    <tr style="background-color: #FAFAFA; border-bottom: solid 1px lightgray;">
+                        <td colspan="8" style="width: auto;height:34px;">
+                            <p style="font-size:15px;">预　算　支　出</p>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td style="height: 25px; width: 120px; font-size: 13px; border-right: solid 1px lightgray;">
+                            收款方
+                        </td>
+                        <td style="width: 40px; font-size: 13px; border-right: solid 1px lightgray;">
+                            类型
+                        </td>
+                        <td style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">
+                            预算支出金额
+                        </td>
+                        <td style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">
+                            预算付款日期
+                        </td>
+                        <td style="width: 80px; font-size: 13px; border-right: solid 1px lightgray;">
+                            进项税额
+                        </td>
+                        <td style="width: 80px; font-size: 13px; border-right: solid 1px lightgray;">
+                            进项税率
+                        </td>
+                        <td style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">
+                            进项发票种类
+                        </td>
+                        <td style="width: 130px; font-size: 13px;">
+                            备注
+                        </td>
+                    </tr>
+                    @{
+                        for (i = 0; i < acc_yusuan.预算收支.Count; i++)
+                        {
+                            if (acc_yusuan.预算收支[i].收支 == "支出")
+                            {
+                                string tmpa1 = "tableyszc_row" + i.ToString() + "col0";
+                                string tmpa2 = "tableyszc_row" + i.ToString() + "col1";
+                                string tmpa3 = "tableyszc_row" + i.ToString() + "col2";
+                                string tmpa4 = "tableyszc_row" + i.ToString() + "col3";
+                                string tmpa5 = "tableyszc_row" + i.ToString() + "col4";
+                                string tmpa6 = "tableyszc_row" + i.ToString() + "col5";
+                                string tmpa7 = "tableyszc_row" + i.ToString() + "col6";
+                                string tmpa8 = "tableyszc_row" + i.ToString() + "col7";
+                                <tr id="@acc_yusuan.预算收支[i].ID.ToString()" style="border-bottom: solid 1px lightgray;">
+                                    <td id="@tmpa1" style="height: 25px; width: 120px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].借贷方</td>
+                                    <td id="@tmpa2" style="width: 40px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].类型</td>
+                                    <td id="@tmpa3" style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].金额.ToString("C")</td>
+                                    <td id="@tmpa4" style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].日期.ToString("yyyy-MM-dd")</td>
+                                    <td id="@tmpa6" style="width: 80px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].收付税额.ToString("C")</td>
+                                    <td id="@tmpa7" style="width: 80px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].收付税率.ToString()</td>
+                                    <td id="@tmpa8" style="width: 90px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].收付发票种类</td>
+                                    <td id="@tmpa5" style="width: 130px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算收支[i].备注</td>
+                                </tr>
+                            }
+                        }
+                    }
+                </table>
+            </td>
+        </tr>
+
+        <tr id="tr_nbzz">
+            <td colspan="2" style="vertical-align: top; height: 10px;">
+                <table id="tablenbzz" style="width: 100%; text-align: center;">
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td colspan="4" style="width: 100%;height:10px;"></td>
+                    </tr>
+                    <tr style="background-color: #FAFAFA; border-bottom: solid 1px lightgray;">
+                        <td colspan="4" style="width: auto;height:34px;">
+                            <p style="font-size:15px;">内　部　转　账</p>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td style="height: 25px; width: 250px; font-size: 13px; border-right: solid 1px lightgray;">
+                            转账对象
+                        </td>
+                        <td style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;">
+                            转账金额
+                        </td>
+                        <td style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;">
+                            @*转账比例%*@
+                        </td>
+                        <td style="width: 170px; font-size: 13px;">
+                            备注
+                        </td>
+                    </tr>
+                    @{
+                        for (i = 0; i < acc_yusuan.内部转账.Count; i++)
+                        {
+                            string tmpa1 = "tablenbzz_row" + i.ToString() + "col0";
+                            string tmpa2 = "tablenbzz_row" + i.ToString() + "col1";
+                            string tmpa3 = "tablenbzz_row" + i.ToString() + "col2";
+                            string tmpa4 = "tablenbzz_row" + i.ToString() + "col3";
+                            <tr id="@acc_yusuan.内部转账[i].ID.ToString()" style="border-bottom: solid 1px lightgray;">
+                                <td id="@tmpa1" style="height: 25px; width: 250px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.内部转账[i].转账对象</td>
+                                <td id="@tmpa2" style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.内部转账[i].转账金额</td>
+                                <td id="@tmpa3" style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;"> </td>
+                                <td id="@tmpa4" style="width: 170px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.内部转账[i].备注</td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </td>
+        </tr>
+
+        <tr id="tr_yjse" style="display:none;">
+            <td colspan="2" style="vertical-align: top; height: 10px;">
+                <table id="tableyjse" style="width: 100%; text-align: center;">
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td colspan="5" style="width: 100%;height:10px;"></td>
+                    </tr>
+                    <tr style="background-color: #FAFAFA; border-bottom: solid 1px lightgray;">
+                        <td colspan="5" style="width: auto;height:34px;">
+                            <p style="font-size:15px;">应　交　税　额</p>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td style="height: 25px; width: 250px; font-size: 13px; border-right: solid 1px lightgray;">
+                            收票方
+                        </td>
+                        <td style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;">
+                            发票种类
+                        </td>
+                        <td style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;">
+                            应收税额
+                        </td>
+                        <td style="width: 100px; font-size: 13px; border-right: solid 1px lightgray;">
+                            税点
+                        </td>
+                        <td style="width: 170px; font-size: 13px;">
+                            备注
+                        </td>
+                    </tr>
+                    @{
+                        for (i = 0; i < acc_yusuan.预算发票.Count; i++)
+                        {
+                            string tmpa1 = "tableyjse_row" + i.ToString() + "col0";
+                            string tmpa2 = "tableyjse_row" + i.ToString() + "col1";
+                            string tmpa3 = "tableyjse_row" + i.ToString() + "col2";
+                            string tmpa4 = "tableyjse_row" + i.ToString() + "col3";
+                            string tmpa5 = "tableyjse_row" + i.ToString() + "col4";
+                            <tr id="@acc_yusuan.预算发票[i].ID.ToString()" style="border-bottom: solid 1px lightgray;">
+                                <td id="@tmpa1" style="height: 25px; width: 250px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算发票[i].收票方</td>
+                                <td id="@tmpa2" style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算发票[i].发票种类</td>
+                                <td id="@tmpa3" style="width: 150px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算发票[i].应收税额</td>
+                                <td id="@tmpa4" style="width: 100px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算发票[i].税点</td>
+                                <td id="@tmpa5" style="width: 170px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.预算发票[i].备注</td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2" style="vertical-align: top; height: 10px;">
+                <table id="tablesjsr" style="width: 100%; text-align: center;">
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td colspan="5" style="width: 100%;height:10px;"></td>
+                    </tr>
+                    <tr style="background-color: #FAFAFA; border-bottom: solid 1px lightgray;">
+                        <td colspan="5" style="width: auto;height:34px;">
+                            <p style="font-size:15px;">实　际　收　入</p>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td style="height: 25px; width: 200px; font-size: 13px; border-right: solid 1px lightgray;">
+                            付款方
+                        </td>
+                        <td style="width: 80px; font-size: 13px; border-right: solid 1px lightgray;">
+                            类型
+                        </td>
+                        <td style="width: 110px; font-size: 13px; border-right: solid 1px lightgray;">
+                            实际收入金额
+                        </td>
+                        <td style="width: 110px; font-size: 13px; border-right: solid 1px lightgray;">
+                            实际收款日期
+                        </td>
+                        <td style="width: 220px; font-size: 13px;">
+                            备注
+                        </td>
+                    </tr>
+                    @{
+                        for (i = 0; i < acc_yusuan.实际收支.Count; i++)
+                        {
+                            if (acc_yusuan.实际收支[i].收支 == "收入")
+                            {
+                                string tmpa1 = "tablesjsr_row" + i.ToString() + "col0";
+                                string tmpa2 = "tablesjsr_row" + i.ToString() + "col1";
+                                string tmpa3 = "tablesjsr_row" + i.ToString() + "col2";
+                                string tmpa4 = "tablesjsr_row" + i.ToString() + "col3";
+                                string tmpa5 = "tablesjsr_row" + i.ToString() + "col4";
+                                string rqformat = acc_yusuan.实际收支[i].日期.ToString("yyyy-MM-dd");
+                                if (acc_yusuan.实际收支[i].日期 < DateTime.Parse("2000-01-01"))
+                                {
+                                    rqformat = "";
+                                }
+                                <tr id="@acc_yusuan.实际收支[i].ID.ToString()" style="border-bottom: solid 1px lightgray;">
+                                    <td id="@tmpa1" style="height: 25px; width: 200px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.实际收支[i].借贷方</td>
+                                    <td id="@tmpa2" style="width: 80px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.实际收支[i].类型</td>
+                                    <td id="@tmpa3" style="width: 110px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.实际收支[i].金额.ToString("C")</td>
+                                    <td id="@tmpa4" style="width: 110px; font-size: 13px; border-right: solid 1px lightgray;">@rqformat</td>
+                                    <td id="@tmpa5" style="width: 220px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.实际收支[i].备注</td>
+                                </tr>
+                            }
+                        }
+                    }
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2" style="vertical-align: top; height: 10px;">
+                <table id="tablesjzc" style="width: 100%; text-align: center;">
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td colspan="5" style="width: 100%;height:10px;"></td>
+                    </tr>
+                    <tr style="background-color: #FAFAFA; border-bottom: solid 1px lightgray;">
+                        <td colspan="5" style="width: auto;height:34px;">
+                            <p style="font-size:15px;">实　际　支　出</p>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: solid 1px lightgray;">
+                        <td style="height: 25px; width: 200px; font-size: 13px; border-right: solid 1px lightgray;">
+                            收款方
+                        </td>
+                        <td style="width: 80px; font-size: 13px; border-right: solid 1px lightgray;">
+                            类型
+                        </td>
+                        <td style="width: 110px; font-size: 13px; border-right: solid 1px lightgray;">
+                            实际支出金额
+                        </td>
+                        <td style="width: 110px; font-size: 13px; border-right: solid 1px lightgray;">
+                            实际付款日期
+                        </td>
+                        <td style="width: 220px; font-size: 13px;">
+                            备注
+                        </td>
+                    </tr>
+                    @{
+                        for (i = 0; i < acc_yusuan.实际收支.Count; i++)
+                        {
+                            if (acc_yusuan.实际收支[i].收支 == "支出")
+                            {
+                                string tmpa1 = "tablesjzc_row" + i.ToString() + "col0";
+                                string tmpa2 = "tablesjzc_row" + i.ToString() + "col1";
+                                string tmpa3 = "tablesjzc_row" + i.ToString() + "col2";
+                                string tmpa4 = "tablesjzc_row" + i.ToString() + "col3";
+                                string tmpa5 = "tablesjzc_row" + i.ToString() + "col4";
+                                string rqformat = acc_yusuan.实际收支[i].日期.ToString("yyyy-MM-dd");
+                                if (acc_yusuan.实际收支[i].日期 < DateTime.Parse("2000-01-01"))
+                                {
+                                    rqformat = "";
+                                }
+                                <tr id="@acc_yusuan.实际收支[i].ID.ToString()" style="border-bottom: solid 1px lightgray;">
+                                    <td id="@tmpa1" style="height: 25px; width: 200px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.实际收支[i].借贷方</td>
+                                    <td id="@tmpa2" style="width: 80px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.实际收支[i].类型</td>
+                                    <td id="@tmpa3" style="width: 110px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.实际收支[i].金额.ToString("C")</td>
+                                    <td id="@tmpa4" style="width: 110px; font-size: 13px; border-right: solid 1px lightgray;">@rqformat</td>
+                                    <td id="@tmpa5" style="width: 220px; font-size: 13px; border-right: solid 1px lightgray;">@acc_yusuan.实际收支[i].备注</td>
+                                </tr>
+                            }
+                        }
+                    }
+                </table>
+            </td>
+        </tr>
+
+
+        <tr>
+            <td colspan="2" style="vertical-align: top; font-size: 13px; height: 50px; ">
+                @{
+                    string color1 = "#00FF00";
+                    string color2 = "#99CC99";
+                    string color3 = "#99CC99";
+                    string color4 = "#99CC99";
+                    string color5 = "#99CC99";
+                    string color6 = "#99CC99";
+                    string color7 = "#99CC99";
+                    switch (acc_yusuan.预算状态)
+                    {
+                        case "待申请":
+                            break;
+                        case "待审批":
+                            color2 = color1;
+                            break;
+                        case "待核定":
+                            color2 = color1;
+                            color3 = color1;
+                            color4 = color1;
+                            break;
+                        case "待完成":
+                            color2 = color1;
+                            color3 = color1;
+                            color4 = color1;
+                            color5 = color1;
+                            color6 = color1;
+                            break;
+                        case "已完成":
+                            color2 = color1;
+                            color3 = color1;
+                            color4 = color1;
+                            color5 = color1;
+                            color6 = color1;
+                            color7 = color1;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                <table id="tablejindu" style="width: 100%; text-align: center; ">
+                    <tr>
+                        <td width="18" style="height:30px;"> </td>
+                        <td width="102">&nbsp;</td>
+                        <td width="17"> </td>
+                        <td width="103">&nbsp;</td>
+                        <td width="11"> </td>
+                        <td width="109">&nbsp;</td>
+                        <td width="8"> </td>
+                    </tr>
+                    <tr style="height:3px;">
+                        <td rowspan="3" bgcolor="@color1" style="height:3px;"><div align="center">申请</div></td>
+                        <td style="height:3px;"></td>
+                        <td rowspan="3" bgcolor="@color3"><div align="center">审批</div></td>
+                        <td></td>
+                        <td rowspan="3" bgcolor="@color5"><div align="center">核定</div></td>
+                        <td></td>
+                        <td rowspan="3" bgcolor="@color7"><div align="center">完成</div></td>
+                    </tr>
+                    <tr style="height:3px;">
+                        <td bgcolor="@color2" style="height:3px;"></td>
+                        <td bgcolor="@color4"></td>
+                        <td bgcolor="@color6"></td>
+                    </tr>
+                    <tr style="height:3px;">
+                        <td style="height:3px;"></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2" style="vertical-align: top; height: 30px;"></td>
+        </tr>
+
+        <tr>
+            <td colspan="2" style="vertical-align: top;height:30px;">
+                <div id="txtclgc" style="width:100px;">
+
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2" style="vertical-align: top;"></td>
+        </tr>
+    </table>
+
+</body>
+</html>
+
+<script type="text/javascript" src="~/Others/js/alert.js"></script>
+<script type="text/javascript" src="~/Others/js/confirm.js"></script>
+<script type="text/javascript" language="javascript">
+
+    function lclose(strid) {
+        var ad = document.getElementById(strid)
+        ad.style.display = (ad.style.display == 'none') ? '' : 'none';
+    }
+
+    function quxiao() {
+        window.location.href = "/Home/Index";
+    }
+
+    function comboitemclick(txtid, txtvalue) {
+        var a = document.getElementById(txtid)
+        a.value = txtvalue;
+    }
+
+    //固定预算/项目预算
+    var gl_lx = $("#txtgl_lx").val();
+    if (gl_lx == "" || undefined || null) {
+        gl_lx = "0";
+    }
+    if (gl_lx == "0") {
+        var tr_nbzz = document.getElementById('tr_nbzz');
+        tr_nbzz.style.display = 'none';
+        var tr_yjse = document.getElementById('tr_yjse');
+        tr_yjse.style.display = 'none';
+        var tr_ywlx = document.getElementById('tr_ywlx');
+        tr_ywlx.style.display = 'none';
+    }
+
+    //是否中证通订单
+
+    var iszztdd = $("#iszztdd").val();
+    if (iszztdd == "" || undefined || null) {
+        iszztdd = "";
+    }
+    if (iszztdd != "是") {
+        var tr_zztdd = document.getElementById('zztddxx');
+        tr_zztdd.style.display = 'none';
+    }
+
+    function dayin() {
+        var a = document.getElementById('txtjzid');
+        window.open("Printformvisa?tid=" + a.value);
+    }
+
+
+    document.getElementById("worktable").style.height = document.body.clientHeight + "px";
+
+    $("#txtfj").load("Material", { "sID": $("#txtjzid").val(), "viewonly": '1' }).show();   //刷新附件列表
+    $("#txtclgc").load("Steps", { "sID": $("#txtjzid").val() }).show();   //刷新处理过程列表
+
+</script>
+
+

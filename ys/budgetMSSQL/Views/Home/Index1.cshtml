@@ -1,0 +1,165 @@
+﻿@{
+    ViewBag.Title = "首页";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script type="text/javascript" language="javascript">
+        var windowWidth = $(window).width();
+        if (parseInt(windowWidth) < 1000) {
+            document.getElementById('mainmenu').style.display = 'none';
+            document.getElementById('maincaption').style.height = '86px';
+        }
+    </script>
+
+    <style>
+        @{
+            string s1 = "";
+            bool b1 = false;
+            b1 = Request.Browser.IsMobileDevice;
+
+            //如果是移动设备
+            if(b1 && (Request.Browser.ScreenPixelsWidth < 700)) {
+                s1 = "";
+            }
+            else {
+                s1 = "../Images/backimg.jpg";
+            }
+        }
+
+            .divbackground {
+                background: url(@s1)repeat;
+                background-color: #2A293B;
+                width: 100%;
+                height: 100%;
+                background-size: 100% 100%;
+                position: relative;
+                min-height: 500px;
+                filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='../Images/backimg.jpg',sizingMethod='scale');
+                text-align: center;
+            }
+
+                .divbackground span {
+                    height: 100%;
+                    display: inline-block;
+                    vertical-align: middle;
+                }
+
+            div.divin {
+                display: inline-block;
+                vertical-align: middle;
+                text-align: center;
+            }
+
+            p.divin {
+                font-size: 16px;
+                font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+                color: white;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+                p.divin:hover {
+                    font-size: 16px;
+                    font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+                    color: gray;
+                    text-decoration: none;
+                }
+
+
+            img.lan {
+                width: 120px;
+                height: 120px;
+            }
+    </style>
+</head>
+
+<body style="background-color: #2A293B;">
+
+    <!-- 内容 -->
+    <div class="divbackground">
+        <table style="width:100%;height:400px;">
+            <caption>&nbsp;</caption>
+            <tr>
+                <td style="text-align:right;">
+                    <div class="service-grd wow fadeInLeftBig" data-wow-duration="1000ms" data-wow-delay="300ms">
+                        <div class="divin">
+                            <a href="~/Guide/Index">
+                                <img class="lan" src="~/Images/snzn.gif" alt="">
+                                <p class="divin">&nbsp;</p>
+                                <p class="divin"><span style="color:yellow;">▉&nbsp;</span>服务指南&nbsp;&nbsp;&nbsp;</p>
+                            </a>
+                        </div>
+                    </div>
+                </td>
+                <td id="gl1" style="width:80px;"></td>
+                <td style="text-align:left;">
+                    <div class="service-grd wow fadeInLeftBig" data-wow-duration="1000ms" data-wow-delay="300ms">
+                        <div class="divin">
+                            <a href="~/Apply/Index">
+                                <img class="lan" src="~/Images/sbqz.gif" alt="">
+                                <p class="divin">&nbsp;</p>
+                                <p class="divin"><span style="color:yellow;">▉&nbsp;</span>申办签证&nbsp;&nbsp;&nbsp;</p>
+                            </a>
+                        </div>
+                    </div>
+                </td>
+                <td style="width:10px;"></td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    <div class="service-grd wow fadeInLeftBig" data-wow-duration="1000ms" data-wow-delay="300ms">
+                        <div class="service-grd wow fadeInLeftBig" data-wow-duration="1000ms" data-wow-delay="300ms">
+                            <div class="divin">
+                                <a href="~/Appoint/Index">
+                                    <img class="lan" src="~/Images/fwyy.gif" alt="">
+                                    <p class="divin">&nbsp;</p>
+                                    <p class="divin"><span style="color:yellow;">▉&nbsp;</span>预约服务&nbsp;&nbsp;&nbsp;</p>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td id="gl2" style="width:80px;"></td>
+                <td style="text-align: left;">
+                    <div class="service-grd wow fadeInLeftBig" data-wow-duration="1000ms" data-wow-delay="300ms">
+                        <div class="divin">
+                            <a href="~/Home/More">
+                                <img class="lan" src="~/Images/qtxx.gif" alt="">
+                                <p class="divin">&nbsp;</p>
+                                <p class="divin"><span style="color:yellow;">▉&nbsp;</span>更多服务&nbsp;&nbsp;&nbsp;</p>
+                            </a>
+                        </div>
+                    </div>
+                </td>
+                <td style="width:10px;"></td>
+            </tr>
+        </table>
+    </div>
+    <!-- //内容 -->
+
+    <input id="ttt" type="hidden">
+
+</body>
+</html>
+
+<script type="text/javascript" language="javascript">
+    var windowWidth = $(window).width();
+    //if (parseInt(windowWidth) < 1000) {
+    if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+        document.getElementById('gl1').style.width = '20px';
+        document.getElementById('gl2').style.width = '20px';
+
+        document.getElementById('ttt').value = windowWidth + 'mobil';
+        document.getElementById('mainmenu').style.display = 'none';
+        document.getElementById('maincaption').style.height = '86px';
+    }
+    else {
+        document.getElementById('ttt').value = windowWidth;
+    }
+    
+</script>

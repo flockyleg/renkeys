@@ -1,0 +1,9 @@
+E:\人科预算系统\源程序\中证通数据\bin\Debug\中证通数据.exe
+E:\人科预算系统\源程序\中证通数据\bin\Debug\中证通数据.pdb
+E:\人科预算系统\源程序\中证通数据\bin\Debug\MySql.Data.dll
+E:\人科预算系统\源程序\中证通数据\obj\Debug\中证通数据.Properties.Resources.resources
+E:\人科预算系统\源程序\中证通数据\obj\Debug\中证通数据.csproj.GenerateResource.Cache
+E:\人科预算系统\源程序\中证通数据\obj\Debug\中证通数据.exe
+E:\人科预算系统\源程序\中证通数据\obj\Debug\中证通数据.pdb
+E:\人科预算系统\源程序\中证通数据\obj\Debug\中证通数据.frmMainNew.resources
+E:\人科预算系统\源程序\中证通数据\obj\Debug\中证通数据.csprojResolveAssemblyReference.cache

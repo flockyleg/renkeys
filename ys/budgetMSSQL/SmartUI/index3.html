@@ -1,0 +1,153 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>test</title>
+    <script src="js/jquery-1.11.1.js"></script>
+    <style type="text/css">
+        .pop-box {
+            /*弹出窗口后，弹出的DIV采用此CSS，保证置于最上层
+          z-index控制Z轴的坐标，数值越大，离用户越近
+        */
+            z-index: 9999999; /*这个数值要足够大，才能够显示在最上层*/
+            margin-bottom: 3px;
+            display: none;
+            position: absolute;
+            background: gray;
+            border: solid1px #6e8bde;
+        }
+
+        #bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            /*弹出窗口后，添加遮罩层，采用此CSS，将该层置于弹出DIV和页面层之间
+          z-index控制Z轴的坐标，数值越大，离用户越近  rgba(72, 74, 68, 0.46)
+        */
+            z-index: 1001;
+            background-color: #8f9f8f;
+            -moz-opacity: 0.7;
+            opacity: .70;
+            filter: alpha(opacity = 70);
+        }
+
+        <!-- 陈斌加 -->
+        /*显示内容的div */
+        .div_content {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 480px;
+            margin-left: -240px;
+            height: 300px;
+            margin-top: -150px;
+            padding: 0;
+            border: 12px solid #3777BC;
+            background-color: #F0F5F8;
+            _position: absolute;
+            z-index: 1011;
+            overflow: hidden;
+        }
+
+        /*遮盖整个屏幕的div*/
+        .div_overlay {
+            display: none;
+            position: fixed;
+            top: 0%;
+            left: 0%;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            z-index: 1010;
+            -moz-opacity: 0.8;
+            opacity: .80;
+            filter: alpha(opacity=80);
+        }
+       
+    </style>
+
+    <script type="text/javascript">
+
+        function popupDiv(div_id) {
+            // 获取传入的DIV
+            var $div_obj = $("#" + div_id);
+            // 计算机屏幕高度
+            var windowWidth = $(window).width();
+            // 计算机屏幕长度
+            var windowHeight = $(window).height();
+            // 取得传入DIV的高度
+            var popupHeight = $div_obj.height();
+            // 取得传入DIV的长度
+            var popupWidth = $div_obj.width();
+
+            var documentWidth = $(document).width();
+            var documentHeight = $(document).height();
+
+            // // 添加并显示遮罩层
+            //$("<div id='bg'></div>").width(windowWidth * 0.99)
+            //        .height(windowHeight * 0.99).click(function () {
+            //            //hideDiv(div_id);
+            //        }).appendTo("body").fadeIn(200);
+            $("<div id='bg'></div>").width(documentWidth * 0.99)
+                    .height(documentHeight * 0.99).click(function () {
+                        //hideDiv(div_id);
+                    }).appendTo("body").fadeIn(200);
+
+            // 显示弹出的DIV
+            //$div_obj.css({
+            //    "position": "absloute"
+            //}).animate({
+            //    left: windowWidth / 2 - popupWidth / 2,
+            //    top: windowHeight / 2 - popupHeight / 2,
+            //    opacity: "show"
+            //}, "slow");
+            var left1 = windowWidth / 2 - popupWidth / 2;
+            var top1 = windowHeight / 2 - popupHeight / 2;
+            if (left1 < 0) left1 = 0;
+            if (top1 < 0) top1 = 0;
+            if (left1 < $(document).scrollLeft()) left1 = $(document).scrollLeft();
+            if (top1 < $(document).scrollTop()) top1 = $(document).scrollTop();
+            $div_obj.css({
+                "position": "absloute"
+            }).animate({
+                left: left1,
+                top: top1,
+                opacity: "show"
+            }, "slow");
+
+        }
+        /*隐藏弹出DIV*/
+        function hideDiv(div_id) {
+            $("#bg").remove();
+            $("#" + div_id).animate({
+                left: 0,
+                top: 0,
+                opacity: "hide"
+            }, "slow");
+        }
+    </script>
+
+</head>
+<body>
+
+    <div id='pop-div' style="width: 300px;height:500px;" class="pop-box">
+        <h4 class="pop-boxh4">22</h4>
+        <div class="pop-box-body">
+            <p>33</p>
+        </div>
+        <div id='buttonPanel' style="text-align: right">
+            <input type="text" /></input>
+            <input type="text" /></input>
+            <input type="button" value="Close" id="btn1"
+                   onclick="hideDiv('pop-div');" />
+        </div>
+    </div>
+
+    <input type="button" value="21" onclick="popupDiv('pop-div')"
+           style="cursor: pointer;" />
+    <div>2222222333</div>
+    <input type="text" /></input>
+</body>
+</html>

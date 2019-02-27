@@ -1,0 +1,644 @@
+﻿@using applyvisa.Models;
+
+@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "中证通订单对账";
+
+    var cbzxs = ViewBag.cbzxs as List<cls成本中心>;
+    var ywlxs = ViewBag.ywlxs as List<cls业务类型>;
+    var yhs = ViewBag.yhs as List<cls用户>;
+    
+    int i = 0;
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+
+    <script type="text/javascript" src="~/Others/js/alert.js"></script>
+
+    <style>
+        .parent {
+            width: 100%;
+            height: 230px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .button {
+            font-size: 16px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: expanded;
+            color: #333333;
+        }
+    </style>
+
+    <style type="text/css">
+        .pop-box {
+            /*弹出窗口后，弹出的DIV采用此CSS，保证置于最上层
+          z-index控制Z轴的坐标，数值越大，离用户越近
+        */
+            z-index: 9999999; /*这个数值要足够大，才能够显示在最上层*/
+            margin-bottom: 3px;
+            display: none;
+            position: absolute;
+        }
+
+        #bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            /*弹出窗口后，添加遮罩层，采用此CSS，将该层置于弹出DIV和页面层之间
+          z-index控制Z轴的坐标，数值越大，离用户越近  rgba(72, 74, 68, 0.46)
+        */
+            z-index: 1001;
+            background-color: #cfcdcd;
+            -moz-opacity: 0.7;
+            opacity: .70;
+            filter: alpha(opacity = 70);
+        }
+
+        td.style1 {
+            background-color: lightblue;
+            text-align: center;
+            color: gray;
+        }
+    </style>
+    <script type="text/javascript">
+        /*显示DIV*/
+        function popupDiv(div_id) {
+
+            // 获取传入的DIV
+            var $div_obj = $("#" + div_id);
+            // 计算机屏幕高度
+            var windowWidth = $(window).width();
+            // 计算机屏幕长度
+            var windowHeight = $(window).height();
+            // 取得传入DIV的高度
+            var popupHeight = $div_obj.height();
+            // 取得传入DIV的长度
+            var popupWidth = $div_obj.width();
+
+            var documentWidth = $(document).width();
+            var documentHeight = $(document).height();
+
+            $("<div id='bg'></div>").width(documentWidth * 0.99)
+                    .height(documentHeight * 0.99).click(function () {
+                        //hideDiv(div_id);
+                    }).appendTo("body").fadeIn(200);
+
+            var left1 = windowWidth / 2 - popupWidth / 2;
+            var top1 = windowHeight / 2 - popupHeight / 2;
+            if (left1 < 0) left1 = 0;
+            if (top1 < 0) top1 = 0;
+            if (left1 < $(document).scrollLeft()) left1 = $(document).scrollLeft();
+            if (top1 < $(document).scrollTop()) top1 = $(document).scrollTop();
+            top1 = $(document).scrollTop() - 30;   //直接靠上对齐
+            $div_obj.css({
+                "position": "absloute"
+            }).animate({
+                left: left1,
+                top: top1,
+                opacity: "show"
+            }, "slow");
+        }
+
+        /*隐藏DIV*/
+        function hideDiv(div_id) {
+            $("#bg").remove();
+            $("#" + div_id).animate({
+                left: 0,
+                top: 0,
+                opacity: "hide"
+            }, "slow");
+        }
+
+
+
+    </script>
+
+</head>
+
+
+
+<body style="background-color: #2A293B;">
+
+
+    <div id="popRenyuan" class="pop-box">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popRenyuan');">×</button>
+                    <h4 class="modal-title">请选择：</h4>
+                </div>
+                <div class="panel-body" style="height: 100%;">
+                    <table style="width:100%">
+                        @{
+                            string syh1 = "";
+                            string syh2 = "";
+                            string syh3 = "";
+                            string syh4 = "";
+                            for (i = 0; i < yhs.Count; i = i + 4)
+                            {
+                                syh1 = "";
+                                syh2 = "";
+                                syh3 = "";
+                                syh4 = "";
+                                if (i < yhs.Count)
+                                {
+                                    syh1 = yhs[i].姓名;
+                                }
+                                if ((i + 1) < yhs.Count)
+                                {
+                                    syh2 = yhs[i + 1].姓名;
+                                }
+                                if ((i + 2) < yhs.Count)
+                                {
+                                    syh3 = yhs[i + 2].姓名;
+                                }
+                                if ((i + 3) < yhs.Count)
+                                {
+                                    syh4 = yhs[i + 3].姓名;
+                                }
+                                <tr style="width:100%">
+                                    <td style="width: 25%; height: 20px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkry" type="checkbox" value="@syh1">@syh1
+                                    </td>
+                                    <td style="width: 25%; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkry" type="checkbox" value="@syh2">@syh2
+                                    </td>
+                                    <td style="width: 25%; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkry" type="checkbox" value="@syh3">@syh3
+                                    </td>
+                                    <td style="width: 25%; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkry" type="checkbox" value="@syh4">@syh4
+                                    </td>
+                                </tr>
+                            }
+                        }
+
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <input id="lblMsgRY" type="text" readonly="readonly" style="border-style:none;color:red;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popRenyuan');">　取　消　</button>
+                    <button type="button" class="btn btn-primary" onclick="configDiv_Yh('销售');">　确　定　</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="popChengbenzx" class="pop-box">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popChengbenzx');">×</button>
+                    <h4 class="modal-title">请选择：</h4>
+                </div>
+                <div class="panel-body" style="height: 100%;">
+                    <table style="width:100%">
+                        @{
+                            @*for (i = 0; i < cbzxs.Count; i++)
+                                {
+                                    <tr style="width:100%">
+                                        <td style="width: 100%; height: 20px; vertical-align: central; text-align: left;">
+                                            &nbsp;&nbsp;<input name="chkcbzx" type="checkbox" value="@cbzxs[i].成本中心编号">@cbzxs[i].成本中心编号
+                                        </td>
+                                    </tr>
+                                }*@
+                            syh1 = "";
+                            syh2 = "";
+                            syh3 = "";
+                            for (i = 0; i < cbzxs.Count; i = i + 3)
+                            {
+                                syh1 = "";
+                                syh2 = "";
+                                syh3 = "";
+                                if (i < cbzxs.Count)
+                                {
+                                    syh1 = cbzxs[i].成本中心编号;
+                                }
+                                if ((i + 1) < cbzxs.Count)
+                                {
+                                    syh2 = cbzxs[i + 1].成本中心编号;
+                                }
+                                if ((i + 2) < cbzxs.Count)
+                                {
+                                    syh3 = cbzxs[i + 2].成本中心编号;
+                                }
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 20px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkcbzx" type="checkbox" value="@syh1">@syh1
+                                    </td>
+                                    <td style="width: 33%; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkcbzx" type="checkbox" value="@syh2">@syh2
+                                    </td>
+                                    <td style="width: 34%; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkcbzx" type="checkbox" value="@syh3">@syh3
+                                    </td>
+                                </tr>
+                            }
+                        }
+
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <input id="lblMsgCB" type="text" readonly="readonly" style="border-style:none;color:red;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popChengbenzx');">　取　消　</button>
+                    <button type="button" class="btn btn-primary" onclick="configDiv_Yh('成本中心');">　确　定　</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="popYewuleixing" class="pop-box">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popYewuleixing');">×</button>
+                    <h4 class="modal-title">请选择：</h4>
+                </div>
+                <div class="panel-body" style="height: 100%;">
+                    <table style="width:100%">
+                        @{
+                            syh1 = "";
+                            syh2 = "";
+                            syh3 = "";
+                            for (i = 0; i < ywlxs.Count; i = i + 3)
+                            {
+                                syh1 = "";
+                                syh2 = "";
+                                syh3 = "";
+                                if (i < ywlxs.Count)
+                                {
+                                    syh1 = ywlxs[i].业务类型;
+                                }
+                                if ((i + 1) < ywlxs.Count)
+                                {
+                                    syh2 = ywlxs[i + 1].业务类型;
+                                }
+                                if ((i + 2) < ywlxs.Count)
+                                {
+                                    syh3 = ywlxs[i + 2].业务类型;
+                                }
+                                <tr style="width:100%">
+                                    <td style="width: 33%; height: 20px; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkywlx" type="checkbox" value="@syh1">@syh1
+                                    </td>
+                                    <td style="width: 33%; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkywlx" type="checkbox" value="@syh2">@syh2
+                                    </td>
+                                    <td style="width: 34%; vertical-align: central; text-align: left;">
+                                        &nbsp;&nbsp;<input name="chkywlx" type="checkbox" value="@syh3">@syh3
+                                    </td>
+                                </tr>
+                            }
+                        }
+
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <input id="lblMsgYW" type="text" readonly="readonly" style="border-style:none;color:red;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popYewuleixing');">　取　消　</button>
+                    <button type="button" class="btn btn-primary" onclick="configDiv_Yh('业务类型');">　确　定　</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+    @*标题*@
+    <table style="width: 1200px; background-color: white; margin-right: auto; margin-left: auto; margin-top: 0px;">
+        <tr>
+            <td style="text-align: center; vertical-align: middle;height:80px;">
+                <p style="font-size:18px;">预 算 查 询 统 计</p>
+            </td>
+        </tr>
+    </table>
+
+    @*查询条件*@
+    <table style="width: 1200px; background-color: white; margin-right: auto; margin-left: auto; ">
+        <tr>
+            <td style="width:120px;text-align:left;font-size:13px; height:50px;">
+                &nbsp;&nbsp;&nbsp;&nbsp;预算编号
+            </td>
+            <td style="width:200px;">
+                <input id="txtysbh" type="text" class="form-control" style="width: 200px;">
+            </td>
+            <td style="width: 120px; text-align: left; font-size: 13px; height: 50px;">
+                &nbsp;&nbsp;&nbsp;&nbsp;预算名称
+            </td>
+            <td style="width: 353px;">
+                <input id="txtysmc" type="text" class="form-control" style="width: 353px;">
+            </td>
+            <td style="width: 120px; text-align: left; font-size: 13px;">
+                &nbsp;&nbsp;&nbsp;&nbsp;申请日期
+            </td>
+            <td style="width:17px;">
+                <input id="txtsqrq1" type="date" class="form-control" style="width: 170px;">
+            </td>
+            <td style="width:5px;text-align:center;font-size:13px;">
+                ～
+            </td>
+            <td style="width:170px;">
+                <input id="txtsqrq2" type="date" class="form-control" style="width: 170px;">
+            </td>
+            <td style="width: 70px;"></td>
+        </tr>
+    </table>
+    <table style="width: 1200px; background-color: white; margin-right: auto; margin-left: auto; ">
+        <tr>
+            <td style="width: 120px; text-align: left; font-size: 13px; height: 50px;">
+                &nbsp;&nbsp;&nbsp;&nbsp;预算分类
+            </td>
+            <td style="width: 200px;">
+                <select id="txtysfl" class="form-control" style="width: 200px;">
+                    <option value=""></option>
+                    <option value="0">固定预算</option>
+                    <option value="1">项目预算</option>
+                </select>
+            </td>
+            <td style="width: 120px; text-align: left; font-size: 13px; height: 50px;">
+                &nbsp;&nbsp;&nbsp;&nbsp;申请人
+            </td>
+            <td style="width: 353px;">
+                <input id="txtsqr" type="text" class="form-control" style="width: 353px;">
+            </td>
+            <td style="width: 120px; text-align: left; font-size: 13px;">
+                &nbsp;&nbsp;&nbsp;&nbsp;业务类型
+            </td>
+            <td style="width: 353px;">
+                <input id="txtywlx" type="text" class="form-control" style="width: 353px;">
+            </td>
+            <td style="width: 20px; text-align: left;"><button class="btn btn-sm" type="button" onclick="popupDiv('popYewuleixing');">…</button></td>
+            <td style="width: 20px;"></td>
+        </tr>
+    </table>
+    <table style="width: 1200px; background-color: white; margin-right: auto; margin-left: auto; ">
+        <tr>
+            <td style="width: 120px; text-align: left; font-size: 13px; height: 50px;">
+                &nbsp;&nbsp;&nbsp;&nbsp;预算说明
+            </td>
+            <td style="width: 200px;">
+                <input id="txtyssm" type="text" class="form-control" style="width: 200px;">
+            </td>
+            <td style="width: 120px; text-align: left; font-size: 13px; height: 50px;">
+                &nbsp;&nbsp;&nbsp;&nbsp;收付方
+            </td>
+            <td style="width: 353px;">
+                <input id="txtsff" type="text" class="form-control" style="width: 353px;">
+            </td>
+            <td style="width: 120px; text-align: left; font-size: 13px;">
+                &nbsp;&nbsp;&nbsp;&nbsp;成本中心
+            </td>
+            <td style="width: 353px;">
+                <input id="txtcbzx" type="text" class="form-control" style="width: 353px;">
+            </td>
+            <td style="width: 20px; text-align: left;"><button class="btn btn-sm" type="button" onclick="popupDiv('popChengbenzx');">…</button></td>
+            <td style="width: 20px;"></td>
+        </tr>
+    </table>
+    <table style="width: 1200px; background-color: white; margin-right: auto; margin-left: auto; ">
+        <tr>
+            <td style="width: 120px; text-align: left; font-size: 13px; height: 50px;">
+                &nbsp;&nbsp;&nbsp;&nbsp;中证通订单
+            </td>
+            <td style="width: 200px;">
+                <input id="txtzztdd" type="text" class="form-control" style="width: 200px;" value="是" readonly="readonly">
+            </td>
+            <td style="width: 120px; text-align: left; font-size: 13px; height: 50px;">
+                &nbsp;&nbsp;&nbsp;&nbsp;线上线下
+            </td>
+            <td style="width: 353px;">
+                <select id="txtxsxx" class="form-control" style="width: 353px;">
+                    <option value=""></option>
+                    <option value="线上">线上</option>
+                    <option value="线下">线下　</option>
+                </select>
+            </td>
+            <td style="width: 120px; text-align: left; font-size: 13px;">
+                &nbsp;&nbsp; &nbsp;&nbsp;销售
+            </td>
+            <td style="width: 353px; ">
+                <input id="txtxs" type="text" class="form-control" style="width: 353px;">
+            </td>
+            <td style="width: 20px; text-align: left;"><button class="btn btn-sm" type="button" onclick="popupDiv('popRenyuan');">…</button></td>
+            <td style="width: 20px;"></td>
+        </tr>
+    </table>
+
+    <table style="width: 1200px; background-color: white; margin-right: auto; margin-left: auto; ">
+        <tr>
+            <td style="width: 120px; text-align: left; font-size: 13px; height: 50px;">
+                &nbsp;&nbsp;&nbsp;&nbsp;公证处
+            </td>
+            <td style="width: 200px;">
+                <input id="txtgzc" type="text" class="form-control" style="width: 200px;">
+            </td>
+            <td style="width: 120px; text-align: left; font-size: 13px; height: 50px;">
+                &nbsp;&nbsp;&nbsp;&nbsp;子订单号
+            </td>
+            <td style="width: 353px;">
+                <input id="txtzddh" type="text" class="form-control" style="width: 353px;">
+            </td>
+            <td style="width: 120px; text-align: left; font-size: 13px;">
+                &nbsp;&nbsp; &nbsp;&nbsp;订单渠道
+            </td>
+            <td style="width: 353px; ">
+                <input id="txtqd" type="text" class="form-control" style="width: 353px;">
+            </td>
+            <td style="width: 70px;"></td>
+        </tr>
+    </table>
+
+
+    <table style="width: 1200px; background-color: white; margin-right: auto; margin-left: auto; ">
+        <tr>
+            <td style="width: 100px; text-align: left; font-size: 13px; height: 50px;">
+                &nbsp;&nbsp;&nbsp;&nbsp;处理状态
+            </td>
+            <td style="width: 353px;">
+                <input id="txtclzt" type="hidden"><input name="chkzt" type="checkbox" value="待申请">待申请&nbsp;&nbsp;<input name="chkzt" type="checkbox" value="待审批">待审批&nbsp;&nbsp;<input name="chkzt" type="checkbox" value="待核定">待核定&nbsp;&nbsp;<input name="chkzt" type="checkbox" value="待完成">待完成&nbsp;&nbsp;<input name="chkzt" type="checkbox" value="已完成">已完成
+            </td>
+            <td style="width: 100px; text-align: left; font-size: 13px;">
+                &nbsp;&nbsp;&nbsp;&nbsp;排序方式
+            </td>
+            <td style="width: 200px; text-align: left; font-size: 13px; ">
+                <select id="txtpaixu" class="form-control" style="width: 200px;">
+                    <option value="申请日期降序">申请日期降序</option>
+                    <option value="申请日期升序">申请日期升序</option>
+                    <option value="成本中心编号">成本中心编号</option>
+                    <option value="业务类型">业务类型</option>
+                    <option value="处理状态">处理状态</option>
+                    <option value="处理状态">申请人</option>
+                    <option value="处理状态">销售</option>
+                </select>
+            </td>
+            <td style="width: 300px;"></td>
+        </tr>
+    </table>
+
+    @*查询按钮*@
+    <table style="width: 1200px; background-color: white; margin-right: auto; margin-left: auto;">
+        <tr>
+            <td style="width: auto; text-align: center; vertical-align: middle; height: 40px;">
+                <input id="lblMsg1" type="text" readonly="readonly" style="border-style:none;color:red;">
+            </td>
+            <td style="width:120px;">
+                &nbsp;&nbsp;&nbsp;<button id="butCx" class="btn btn-primary" type="button" style="width:100px;">查　询</button>
+            </td>
+            <td style="width:120px;">
+                &nbsp;&nbsp;<button class="btn btn-primary" type="button" style="width:100px;" onclick="previousstep();">关　闭</button>
+            </td>
+        </tr>
+
+
+        <tr>
+            <td style="width: auto; text-align: center; vertical-align: middle; height: 20px;"></td>
+            <td style="width:120px;"></td>
+            <td style="width:120px;"></td>
+        </tr>
+    </table>
+
+
+
+    @*查询结果*@
+    <table style="width: 1200px; background-color: white; min-height: 600px; margin-right: auto; margin-left: auto;">
+        <tr>
+            <td style="height:100%;vertical-align:top;">
+                <div id="divResult">
+
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="height:50px;vertical-align:top;"></td>
+        </tr>
+    </table>
+
+
+</body>
+</html>
+
+
+<script type="text/javascript" language="javascript">
+    $(document).ready(function () {
+        $("#butCx").click(function () {
+            configDiv_Yh('状态');
+
+            $.ajax({
+                type: 'POST',
+                url: "/Check/CheckZztQueryCx",
+                data: {
+                    txtpaixu: $("#txtpaixu").val(),
+                    txtywlx: $("#txtywlx").val(),
+                    txtsqrq1: $("#txtsqrq1").val(),
+                    txtsqrq2: $("#txtsqrq2").val(),
+                    txtysbh: $("#txtysbh").val(),
+                    txtysmc: $("#txtysmc").val(),
+                    txtsqr: $("#txtsqr").val(),
+                    txtcbzx: $("#txtcbzx").val(),
+                    txtyssm: $("#txtyssm").val(),
+                    txtxs: $("#txtxs").val(),
+                    txtclzt: $("#txtclzt").val(),
+                    txtysfl: $("#txtysfl").val(),
+                    txtzztdd: $("#txtzztdd").val(),
+                    txtxsxx: $("#txtxsxx").val(),
+                    txtqd: $("#txtqd").val(),
+                    txtgzc: $("#txtgzc").val(),
+                    txtzddh: $("#txtzddh").val(),
+                    txtsff: $("#txtsff").val()
+                },
+                dataType: "json",
+                success: function (sesponseTest) {
+                    $("#divResult").load("/Check/CheckZztQueryList");
+
+                }
+            });
+        });
+    });
+
+
+    //用户选择 / 成本中心编号选择
+    function configDiv_Yh(type) {
+        var chkObjs = "";
+
+        if (type == "销售") {
+            var obj = document.getElementsByName("chkry")
+            for (var i = 0; i < obj.length; i++) {
+                if (obj[i].checked) {
+                    chkObjs = chkObjs + " " + obj[i].value;
+                }
+            }
+            chkObjs = chkObjs.trim();
+            $("#txtxs").val(chkObjs);
+            hideDiv("popRenyuan");
+            return;
+        }
+        if (type == "成本中心") {
+            var obj = document.getElementsByName("chkcbzx")
+            for (var i = 0; i < obj.length; i++) {
+                if (obj[i].checked) {
+                    chkObjs = chkObjs + " " + obj[i].value;
+                }
+            }
+            chkObjs = chkObjs.trim();
+            $("#txtcbzx").val(chkObjs);
+            hideDiv("popChengbenzx");
+            return;
+        }
+        if (type == "业务类型") {
+            var obj = document.getElementsByName("chkywlx")
+            for (var i = 0; i < obj.length; i++) {
+                if (obj[i].checked) {
+                    chkObjs = chkObjs + " " + obj[i].value;
+                }
+            }
+            chkObjs = chkObjs.trim();
+            $("#txtywlx").val(chkObjs);
+            hideDiv("popYewuleixing");
+            return;
+        }
+        if (type == "状态") {
+            var obj = document.getElementsByName("chkzt")
+            for (var i = 0; i < obj.length; i++) {
+                if (obj[i].checked) {
+                    chkObjs = chkObjs + " " + obj[i].value;
+                }
+            }
+            chkObjs = chkObjs.trim();
+            $("#txtclzt").val(chkObjs);
+            return;
+        }
+
+    }
+
+    function previousstep() {
+        window.location.href = "/Home/Index";
+    }
+
+    function Export2Excel() {
+        var q = $("#wheresql").val();
+        if (q == "" || undefined || null) {
+            q = " where 1=2";
+        }
+        q = 'select * from V预算统计 ' + q;
+        //alert(q);
+        q = escape(q);
+        var s = "../Check/Export2Excel?w=" + q;
+        window.location = s;
+    }
+
+</script>
+
+
+

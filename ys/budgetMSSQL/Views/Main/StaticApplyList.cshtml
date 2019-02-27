@@ -1,0 +1,741 @@
+﻿@using applyvisa.Models;
+
+@{
+    
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "预算清单";
+
+    int percount = 20;   //每页20行
+    int pagenum = 0;     //当前页码
+    int pagetotal = 0;   //总页数
+
+    string s1 = "";
+    string s2 = "";
+    string s3 = "";
+    string s4 = "";
+    string s5 = "";
+    string s6 = "";
+    string s7 = "";
+    string s8 = "";
+    List<cls预算单> lstsb = null;
+
+    //try { pagenum = (int)ViewBag.pagenum; }
+    //catch { }
+    //try { pagetotal = (int)ViewBag.pagetotal; }
+    //catch { }
+    try { pagenum = (int)TempData["pagenum"]; }
+    catch { }
+    try { pagetotal = (int)TempData["pagetotal"]; }
+    catch { }
+
+    try { s1 = (string)TempData["sbcx_t1"]; }
+    catch { }
+    try { s2 = (string)TempData["sbcx_t2"]; }
+    catch { }
+    try { s3 = (string)TempData["sbcx_t3"]; }
+    catch { }
+    try { s4 = (string)TempData["sbcx_t4"]; }
+    catch { }
+    try { s5 = (string)TempData["sbcx_t5"]; }
+    catch { }
+    try { s6 = (string)TempData["sbcx_t6"]; }
+    catch { }
+    try { s7 = (string)TempData["sbcx_t7"]; }
+    catch { }
+    try { s8 = (string)TempData["sbcx_t8"]; }
+    catch { }
+
+    //try { lstsb = (List<cls预算单>)ViewBag.pagedata; }
+    //catch { }
+    try { lstsb = (List<cls预算单>)TempData["pagedata"]; }
+    catch { }
+    if (lstsb == null)
+    {
+        lstsb = new List<cls预算单>();
+    }
+    int i = 0;
+    //string sdenglurenming = ViewBag.dlzx as string;
+    string sdenglurenming = (string)TempData["dlzx"];
+    string sleixing = (string)TempData["sleixing"];
+
+    var wheresql = TempData["wheresql"] as string;
+    string wcczr = ViewBag.wcczr as string;
+    var ysczcjqxr = ViewBag.ysczcjqxr as string;
+    
+    var cbzxs = ViewBag.cbzxs as List<cls成本中心>;
+    
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+
+    <script type="text/javascript" src="~/Others/js/alert.js"></script>
+
+    <style>
+        .parent {
+            width: 100%;
+            height: 230px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .button {
+            font-size: 16px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: expanded;
+            color: #333333;
+        }
+    </style>
+
+    <style type="text/css">
+        .pop-box {
+            /*弹出窗口后，弹出的DIV采用此CSS，保证置于最上层
+          z-index控制Z轴的坐标，数值越大，离用户越近
+        */
+            z-index: 9999999; /*这个数值要足够大，才能够显示在最上层*/
+            margin-bottom: 3px;
+            display: none;
+            position: absolute;
+        }
+
+        #bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            /*弹出窗口后，添加遮罩层，采用此CSS，将该层置于弹出DIV和页面层之间
+          z-index控制Z轴的坐标，数值越大，离用户越近  rgba(72, 74, 68, 0.46)
+        */
+            z-index: 1001;
+            background-color: #cfcdcd;
+            -moz-opacity: 0.7;
+            opacity: .70;
+            filter: alpha(opacity = 70);
+        }
+
+        td.style1 {
+            background-color: lightblue;
+            text-align: center;
+            color: gray;
+        }
+    </style>
+    <script type="text/javascript">
+        /*显示DIV*/
+        function popupDiv(div_id, banliid) {
+
+            var a = document.getElementById('txtbanliid')
+            a.value = banliid;
+
+
+            // 获取传入的DIV
+            var $div_obj = $("#" + div_id);
+            // 计算机屏幕高度
+            var windowWidth = $(window).width();
+            // 计算机屏幕长度
+            var windowHeight = $(window).height();
+            // 取得传入DIV的高度
+            var popupHeight = $div_obj.height();
+            // 取得传入DIV的长度
+            var popupWidth = $div_obj.width();
+
+            var documentWidth = $(document).width();
+            var documentHeight = $(document).height();
+
+            $("<div id='bg'></div>").width(documentWidth * 0.99)
+                    .height(documentHeight * 0.99).click(function () {
+                        //hideDiv(div_id);
+                    }).appendTo("body").fadeIn(200);
+
+            var left1 = windowWidth / 2 - popupWidth / 2;
+            var top1 = windowHeight / 2 - popupHeight / 2;
+            if (left1 < 0) left1 = 0;
+            if (top1 < 0) top1 = 0;
+            if (left1 < $(document).scrollLeft()) left1 = $(document).scrollLeft();
+            if (top1 < $(document).scrollTop()) top1 = $(document).scrollTop();
+            top1 = $(document).scrollTop() - 30;   //直接靠上对齐
+            $div_obj.css({
+                "position": "absloute"
+            }).animate({
+                left: left1,
+                top: top1,
+                opacity: "show"
+            }, "slow");
+        }
+
+        /*隐藏DIV*/
+        function hideDiv(div_id) {
+            $("#bg").remove();
+            $("#" + div_id).animate({
+                left: 0,
+                top: 0,
+                opacity: "hide"
+            }, "slow");
+        }
+
+        
+
+    </script>
+
+</head>
+
+<body style="background-color: #2A293B;">
+    
+    <input id="cx_dlz" value="@sdenglurenming" type="hidden">
+    <input id="cx_lx" value="@sleixing" type="hidden">
+    <input id="kz_wcczr" value="@wcczr" type="hidden">
+    <input id="kz_ysczcjqxr" value="@ysczcjqxr" type="hidden">
+
+    <div id="popXQ" class="pop-box" style="width:840px;">
+        <div class="modal-dialog" style="width: 840px;">
+            <div class="modal-content" style="width: 840px;">
+
+                <input id="txtbanliid" type="hidden">
+
+                <div class="modal-header" style="width: 838px; background-color: #97bad1;">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close" onclick="hideDiv('popXQ');">×</button>
+                    <input id="lblXqbt" type="text" readonly="readonly" style="z-index: 0; border: none; width: 400px; background-color: #97bad1;color:white;">
+                </div>
+                <div id="ysxiangqing" class="panel-body" style="background-color: #FDFDFD; ">
+
+                </div>
+                <div class="modal-footer" style="background-color: #FDFDFD;">
+                    <button type="button" data-dismiss="modal" class="btn btn-default" onclick="hideDiv('popXQ');">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <table id="worktable" style="width: 1024px; background-color: white; min-height: 400px; margin-right: auto; margin-left: auto;">
+        <tr>
+            <td style="height:100%;vertical-align:top;">
+                <div class="divbackground">
+                    <li class="list-group-item" style="background-color:#f2f6f7;">
+                        <table style="width: 100%; height: 60px; ">
+                            <tr style="width: 100%; height: 50px;">
+                                <td style="text-align: left; width: 70px;">申请日期</td>
+                                <td style="text-align: center; "><input id="txt1" type="date" class="form-control" style="z-index:0;" value="@s1"></td>
+                                <td style="text-align: center; width: 70px; ">～</td>
+                                <td style="text-align: center; "><input id="txt2" type="date" class="form-control" style="z-index:0;" value="@s2"></td>
+                            </tr>
+                            <tr style="width: 100%; height: 50px;">
+                                <td style="text-align: left; width: 70px;">预算编号</td>
+                                <td style="text-align: center; "><input id="txt3" type="text" class="form-control" style="z-index:0;" value="@s3"></td>
+                                <td style="text-align: right; width: 70px; ">预算名称&nbsp;</td>
+                                <td style="text-align: center; "><input id="txt4" type="text" class="form-control" style="z-index:0;" value="@s4"></td>
+                            </tr>
+                            <tr style="width: 100%; height: 50px;">
+                                <td style="text-align: left; width: 70px;">成本中心</td>
+                                <td style="text-align: center; ">
+                                    <div class="input-group" style="top:10px;">
+                                        <input id="txt5" type="text" class="form-control" style="z-index:0;" value="@s5">
+                                        <div class="input-group-btn">
+                                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <span class="caret"></span></button>
+                                            <ul class="dropdown-menu dropdown-menu-right">
+                                                <li><a onclick="comboitemclick('txt5', '');"></a></li>
+                                                @{
+                                                for (i = 0; i < cbzxs.Count; i++)
+                                                {
+                                                <li><a onclick="comboitemclick('txt5', '@cbzxs[i].成本中心编号');">@cbzxs[i].成本中心编号</a></li>
+                                                }
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="text-align: right; width: 70px; ">处理状态&nbsp;</td>
+                                <td style="text-align: center; ">
+                                    <input type="hidden" id="txttempblzt" value="@s6">
+                                    <select id="txt6" class="form-control">
+                                        <option value=""></option>
+                                        <option value="待申请">待申请</option>
+                                        <option value="待审批">待审批</option>
+                                        <option value="待核定">待核定</option>
+                                        <option value="待完成">待完成</option>
+                                        <option value="已完成">已完成</option>
+                                        <option value="已审核">已审核</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr style="width: 100%; height: 50px;">
+                                <td style="text-align: left; width: 70px;">申请人</td>
+                                @{
+                                    if (sleixing == "")
+                                    {
+                                        <td style="text-align: center; "><input id="txt7" type="text" class="form-control" style="z-index:0;" value="@s7"></td>
+                                    }
+                                    else
+                                    {
+                                        <td style="text-align: center; "><input id="txt7" type="text" class="form-control" style="z-index:0;" value="@sdenglurenming" readonly="readonly"></td>
+                                    }
+                                }
+                                <td style="text-align: right; width: 70px; ">收/付方&nbsp;</td>
+                                <td style="text-align: center; "><input id="txt8" type="text" class="form-control" style="z-index:0;" value="@s8"></td>
+                            </tr>
+                        </table>
+                    </li>
+
+                    <li class="list-group-item">
+                        <table style="width:100%;height:60px;">
+                            <tr style="width:100%">
+                                <td style="text-align: right; "><button id="butCx" class="btn btn-primary" type="button" style="width:100px;">查　询</button></td>
+                                <td style="width: 180px; text-align: center; "></td>
+                                <td style="text-align: left; "><button class="btn btn-primary" type="button" style="width:100px;" onclick="previousstep();">关　闭</button></td>
+                            </tr>
+                        </table>
+                    </li>
+
+
+
+                    <li class="list-group-item">
+                        <table class="table table-hover" style="padding-left:0px;padding-right:0px;">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>预算编号</th>
+                                    <th>预算名称</th>
+                                    <th>成本中心编号</th>
+                                    <th>申请日期</th>
+                                    <th>预收</th>
+                                    <th>预支</th>
+                                    <th>状态</th>
+                                    <th>审批</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @{
+
+                                    for (i = 0; i < lstsb.Count; i++)
+                                    {
+                                        int xh = (pagenum - 1) * percount + i + 1;
+                                        <tr>
+                                            <td>@xh</td>
+                                            <td><a href="javascript:showDetail('@lstsb[i].ID','@lstsb[i].类型');">@lstsb[i].预算编号</a></td>
+                                            <td>@lstsb[i].预算名称</td>
+                                            <td>@lstsb[i].成本中心编号</td>
+                                            <td>@lstsb[i].申请日期.ToString("yyyy-MM-dd")</td>
+                                            <td>@lstsb[i].管理_预算收入金额</td>
+                                            <td>@lstsb[i].管理_预算支出金额</td>
+                                            @{
+                                            string zt = "";
+                                            //switch (lstsb[i].预算状态.Trim())
+                                            //{
+                                            //    case "起草":
+                                            //        zt = "待申请";
+                                            //        break;
+                                            //    case "申请":
+                                            //        zt = "待审批";
+                                            //        break;
+                                            //    case "送核":
+                                            //        zt = "待核定";
+                                            //        break;
+                                            //    case "核定":
+                                            //        zt = "待完成";
+                                            //        break;
+                                            //    case "完成":
+                                            //        zt = "已完成";
+                                            //        break;
+                                            //    default:
+                                            //        zt = lstsb[i].预算状态;
+                                            //        break;
+                                            //}
+                                            zt = lstsb[i].预算状态;
+                                            }
+                                            <td>@zt</td>
+                                            <td>@lstsb[i].审批结果</td>
+                                            @{
+                                            if (sleixing == "")   //所有预算查询 或者 固定预算完成指定人查询 或者 预算操作超级权限人
+                                            {                                                
+                                                if ((lstsb[i].预算状态.Trim() == "待完成") && (lstsb[i].类型 == 0) && ((" " + wcczr + " ").IndexOf(" " + sdenglurenming.Trim() + " ") > -1))   //固定预算只能指定人能点完成
+                                                {
+                                                    <td id="@lstsb[i].ID"><a href="javascript:banjie('@lstsb[i].ID','@sdenglurenming.Trim()','@lstsb[i].申请人');">完成</a></td>
+                                                }
+                                                else
+                                                {
+                                                    if ((" " + ysczcjqxr + " ").IndexOf(" " + sdenglurenming.Trim() + " ") < 0)
+                                                    { 
+                                                        <td><a href="javascript:showDetail('@lstsb[i].ID','@lstsb[i].类型');">详情</a></td>
+                                                    }
+                                                    else
+                                                    {
+                                                        //预算操作超级权限人
+                                                        if (lstsb[i].预算状态.Trim() == "待申请")
+                                                        {
+                                                            <td id="@lstsb[i].ID">@Html.ActionLink("修改", "StaticApplyrecEdit", new { id = lstsb[i].ID }, new { target = "_blank" })</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            if (lstsb[i].预算状态.Trim() == "待完成")
+                                                            {
+                                                                <td id="@lstsb[i].ID"><a href="javascript:banjie('@lstsb[i].ID','@sdenglurenming.Trim()','@lstsb[i].申请人');">完成</a></td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td><a href="javascript:showDetail('@lstsb[i].ID','@lstsb[i].类型');">详情</a></td>
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (lstsb[i].预算状态.Trim() == "待申请")
+                                                {
+                                                    <td id="@lstsb[i].ID">@Html.ActionLink("修改", "StaticApplyrecEdit", new { id = lstsb[i].ID }, new { target = "_blank" })</td>
+                                                }
+                                                else
+                                                {
+                                                    if (lstsb[i].预算状态.Trim() == "待完成")
+                                                    {
+                                                        if(lstsb[i].类型 == 0)   //固定预算只能指定人能点完成
+                                                        {
+                                                            if ((" " + wcczr + " ").IndexOf(" " + sdenglurenming.Trim() + " ") < 0)
+                                                            {
+                                                                <td><a href="javascript:showDetail('@lstsb[i].ID','@lstsb[i].类型');">详情</a></td>
+                                                            }
+                                                            else
+                                                            { 
+                                                                <td id="@lstsb[i].ID"><a href="javascript:banjie('@lstsb[i].ID','@sdenglurenming.Trim()','@lstsb[i].申请人');">完成</a></td>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <td id="@lstsb[i].ID"><a href="javascript:banjie('@lstsb[i].ID','@sdenglurenming.Trim()','@lstsb[i].申请人');">完成</a></td>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <td id="@lstsb[i].ID"><a href="javascript:showDetail('@lstsb[i].ID','@lstsb[i].类型');">详情</a></td>
+                                                    }
+                                                }
+                                            }
+}                                           
+                                        </tr>
+                                    }
+
+                                }
+
+                            </tbody>
+                        </table>
+
+                        <br>
+                        <input id="dqy" type="hidden" value="@pagenum"><input id="zys" type="hidden" value="@pagetotal">
+
+                        <table style="width:100%;height:60px;">
+                            <tr style="width:100%">
+                                <td></td>
+                                <td style="text-align: center; width:360px;">
+
+                                    <div class="input-group">
+                                        <span class="input-group-addon">共 @pagetotal 页 / 第</span>
+                                        <input id="txtdangqianye" type="text" class="form-control" style="text-align:center;" value="@pagenum">
+                                        <span class="input-group-addon">页</span>
+                                        <span class="input-group-btn">
+                                            <button id="butsyy" class="btn btn-default" type="button" onclick="rollto(-1);">﹤</button>
+                                        </span>
+                                        <span class="input-group-btn">
+                                            <button id="butxyy" class="btn btn-default" type="button" onclick="rollto(1);">﹥</button>
+                                        </span>
+                                        <span class="input-group-btn">
+                                            <button id="butxy" class="btn btn-default" type="button" onclick="rollto(0);">Go</button>
+                                        </span>
+                                        <span class="input-group-btn">
+                                            <button id="buttoexcel" class="btn btn-default" type="button" onclick="Export2Excel();">导出</button>
+                                        </span>
+                                    </div>                                    
+                                    <input id="wheresql" type="hidden" value="@wheresql">
+                                </td>
+                                <td></td>
+                            </tr>
+                        </table>
+
+                    </li>
+
+
+
+                </div>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
+
+
+<script type="text/javascript" language="javascript">
+    $(document).ready(function () {
+        $("#butCx").click(function () {
+            var lx = $("#cx_lx").val();
+            if (lx == "" || undefined || null) {
+                lx = "";
+            }
+            $.ajax({
+                type: 'POST',
+                url: "/Main/StaticApplyCx",
+                data: {
+                    t0: lx,
+                    t1: $("#txt1").val(),
+                    t2: $("#txt2").val(),
+                    t3: $("#txt3").val(),
+                    t4: $("#txt4").val(),
+                    t5: $("#txt5").val(),
+                    t6: $("#txt6").val(),
+                    t7: $("#txt7").val(),
+                    t8: $("#txt8").val()
+                },
+                dataType: "json",
+                success: function (sesponseTest) {                    
+                    //var sx = $("#cx_dlz").val();
+                    //if (sx == "" || undefined || null) {
+                    //    sx = "";
+                    //}
+                    //if (sx == "")
+                    //{
+                    //    var s = "../Main/StaticApplyList?p=1&r=0&t=2";     //var s = "../Main/StaticApplyListX?p=1&r=0";
+                    //    window.location = s;
+                    //}
+                    //else
+                    //{ 
+                    //    if (lx == "固定")
+                    //    {
+                    //        var s = "../Main/StaticApplyList?p=1&r=0&t=0";   //var s = "../Main/StaticApplyList1?p=1&r=0";
+                    //        window.location = s;
+                    //    }
+                    //    if (lx == "项目") {
+                    //        var s = "../Main/StaticApplyList?p=1&r=0&t=1";    //var s = "../Main/StaticApplyList2?p=1&r=0";
+                    //        window.location = s;
+                    //    }
+                    //}
+                    
+                    if (lx == "") {
+                        var s = "../Main/StaticApplyList?p=1&r=0&t=2";     //var s = "../Main/StaticApplyListX?p=1&r=0";
+                        window.location = s;
+                    }
+                    else {
+                        if ((lx == "0") | (lx == "固定")) {
+                            var s = "../Main/StaticApplyList?p=1&r=0&t=0";   //var s = "../Main/StaticApplyList1?p=1&r=0";
+                            window.location = s;
+                        }
+                        if ((lx == "1") | (lx == "项目")) {
+                            var s = "../Main/StaticApplyList?p=1&r=0&t=1";    //var s = "../Main/StaticApplyList2?p=1&r=0";
+                            window.location = s;
+                        }
+                    }
+                    
+                }
+            });
+        });
+    });
+
+
+    function previousstep() {
+        window.location.href = "/Home/Index";
+    }
+
+    function rollto(intstep) {
+        var a1 = "1";
+        var a2 = "1";
+        var a = "1";
+        a1 = $("#dqy").val();
+        a2 = $("#zys").val();
+        a = $("#txtdangqianye").val();
+        if (a1 == "" || undefined || null) {
+            a1 = '1';
+        }
+        if (a2 == "" || undefined || null) {
+            a2 = '1';
+        }
+        if (a == "" || undefined || null) {
+            a = '1';
+        }
+        a = parseInt(a) + parseInt(intstep);
+        //if (parseInt(a1) > parseInt(a2)) {
+        //    a1 = a2;
+        //}
+        //if (parseInt(a) < parseInt(a1)) {
+        //    a = a1;
+        //}
+        //if (parseInt(a) > parseInt(a2)) {
+        //    a = a2;
+        //}
+
+        var lx = $("#cx_lx").val();
+        if (lx == "" || undefined || null) {
+            lx = "";
+        }
+
+        $("#txtdangqianye").val(a);
+
+        //var sx = $("#cx_dlz").val();
+        //if (sx == "" || undefined || null) {
+        //    sx = "";
+        //}
+        //if (sx == "") {
+        //    var s = "../Main/StaticApplyList?p=" + a + "&r=0&t=2";    //var s = "../Main/StaticApplyListX?p=" + a + "&r=0";
+        //    window.location = s;
+        //}
+        //else {
+        //    if (lx == "固定") {
+        //        var s = "../Main/StaticApplyList?p=" + a + "&r=0&t=0";   //var s = "../Main/StaticApplyList1?p=" + a + "&r=0";
+        //        window.location = s;
+        //    }
+        //    if (lx == "项目") {
+        //        var s = "../Main/StaticApplyList?p=" + a + "&r=0&t=1";    //var s = "../Main/StaticApplyList2?p=" + a + "&r=0";
+        //        window.location = s;
+        //    }
+        //}
+        
+        if (lx == "") {
+            var s = "../Main/StaticApplyList?p=" + a + "&r=0&t=2";    //var s = "../Main/StaticApplyListX?p=" + a + "&r=0";
+            window.location = s;
+        }
+        else {
+            if ((lx == "0") | (lx == "固定")) {
+                var s = "../Main/StaticApplyList?p=" + a + "&r=0&t=0";   //var s = "../Main/StaticApplyList1?p=" + a + "&r=0";
+                window.location = s;
+            }
+            if ((lx == "1") | (lx == "项目")) {
+                var s = "../Main/StaticApplyList?p=" + a + "&r=0&t=1";    //var s = "../Main/StaticApplyList2?p=" + a + "&r=0";
+                window.location = s;
+            }
+        }
+    }
+
+    function comboitemclick(txtid, txtvalue) {
+        var a = document.getElementById(txtid)
+        a.value = txtvalue;
+    }
+
+    function showDetail(strid, strlx) {
+        $("#ysxiangqing").load("/Main/StaticApplyView", { "id": strid }, function () {
+            var cp = '固定';
+            if (strlx == '1') cp = '项目';
+            $("#lblXqbt").val(' ' + cp + '预算浏览');
+            popupDiv('popXQ', strid);
+        });
+    }
+
+
+    $(document).ready(function () {
+        $("#butclqd").click(function () {
+            var s1 = $("#txtjg").val();
+            if (s1 == "" || undefined || null) {
+                $("#lblMsg1").val('请输入处理结果。');
+                return false;
+            }
+            var s2 = $("#txtyj").val();
+            if (s2 == "" || undefined || null) {
+                s2 = "";
+            }
+
+            var sjzid = $("#txtbanliid").val();
+
+            $.ajax({
+                type: 'POST',
+                url: "/Main/Banli",
+                data: {
+                    tjzid: sjzid,
+                    t1: s1,
+                    t2: s2
+                },
+                dataType: "json",
+                success: function (sesponseTest) {
+                    switch (sesponseTest) {
+                        case 300001:
+                            $("#lblMsg1").val('请输入正确的内容。');
+                            return false;
+                        case 300002:
+                            $("#lblMsg1").val('保存失败。');
+                            return false;
+                        default:
+                            hideDiv('popSQR');
+                            var a = $("#txtbanliid").val();
+                            var obj = document.getElementById(a);
+                            obj.innerText = s1;
+                            break;
+                    }
+
+                }
+            });
+        });
+    });
+
+    //完成预算
+    function banjie(strid, strclr, strsqr) {
+        var b1 = confirm("确认要将该预算设置为完成？");
+        if (b1) {
+            $.ajax({
+                type: 'POST',
+                url: "/Main/HandleStaticApply",
+                data: {
+                    xgID: strid,
+                    xgyw: '预算完成',
+                    clr: strclr,
+                    cljg: '完成',
+                    clyj: '',
+                    shenqingren: strsqr,
+                    ysleixing: 0     //这里随便写，用不到
+                }, 
+                dataType: "json",
+                success: function (sesponseTest) {
+                    switch (sesponseTest) {
+                        case 900001:
+                            //alert('a'+sesponseTest);
+                            return;
+                        case 900002:
+                            //alert('b' + sesponseTest);
+                            return;
+                        case 900004:
+                            alert('未输入实际收支，不能设置为完成。');
+                            return;
+                        case '900004':
+                            alert('未输入实际收支，不能设置为完成。');
+                            return;
+                        default:
+                            var obj = document.getElementById(strid)
+                            obj.innerText = "完成";
+                    }
+                }
+            });
+        }
+    }
+</script>
+
+
+<script type="text/javascript">
+
+    function Export2Excel()
+    {
+        var q = $("#wheresql").val();
+        if (q == "" || undefined || null) {
+            q = " where 1=2";
+        }
+        q = 'select * from V预算统计 ' + q;
+        //alert(q);
+        q = escape(q);
+        var s = "../Main/Export2Excel?w=" + q;
+        window.location = s;
+    }
+
+
+
+    //var smms = document.getElementById('txt6');   //上次选中的办理状态条件
+    //var sselected = document.getElementById('txttempblzt');
+    //for (i = 0; i <= smms.options.length; i++) {
+    //    if (smms.options[i].value == sselected.value) {
+    //        smms.options[i].selected = true;
+    //        break;
+    //    }
+    //}
+
+    document.getElementById("worktable").style.height = document.body.clientHeight + "px";
+</script>
+
+
+

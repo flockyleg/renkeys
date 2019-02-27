@@ -1,0 +1,288 @@
+﻿@model applyvisa.Models.cls预算盈亏明细表s
+
+@{
+
+    Layout = null;
+    ViewBag.Title = "预算盈亏明细表";
+
+    int i = 0;
+    int xh = 0;
+    decimal dec1 = 0.00m;
+    decimal dec2 = 0.00m;
+    decimal dec3 = 0.00m;
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+
+    <script type="text/javascript" src="~/Others/js/alert.js"></script>
+
+    <style>
+        .parent {
+            width: 100%;
+            height: 230px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .button {
+            font-size: 16px;
+            font-family: 微软雅黑, Microsoft YaHei, Microsoft YaHei UI, 黑体, Arial, Helvetica, sans-serif;
+            font-stretch: expanded;
+            color: #333333;
+        }
+    </style>
+
+</head>
+
+<body style="background-color: #2A293B;">
+    
+    <input id="wheresql_rpt1_gsm_b" type="hidden" value="@ViewBag.wheresql_rpt1_gsm">
+    <input id="wheresql_rpt1_rq1_b" type="hidden" value="@ViewBag.wheresql_rpt1_rq1">
+    <input id="wheresql_rpt1_rq2_b" type="hidden" value="@ViewBag.wheresql_rpt1_rq2">
+
+    <table id="worktable" style="width: 1024px; background-color: white; min-height: 800px; margin-right: auto; margin-left: auto;">
+        <tr style="border-top:solid 1px #ede9e9;background-color:#f1eded;">
+            <td style="text-align: center; vertical-align: middle;height:40px;">
+                <p style="font-size:16px;">@ViewBag.gsm 收入明细表</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right; vertical-align: middle;height:40px;">
+                <button class="btn btn-sm" type="button" style="width:100px;" onclick="Export2Excel_rpt1b('收入');">导出</button>
+            </td>
+        </tr>
+        <tr>
+            <td style="height:100%;vertical-align:top;" colspan="8">
+                <div class="divbackground">
+                    <li class="list-group-item">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>预算编号</th>
+                                    <th>项目名称</th>
+                                    <th>付款方</th>
+                                    <th>项目状态</th>
+                                    <th>销售</th>
+                                    <th>预算收入</th>
+                                    <th>销项税额</th>
+                                    <th>提交日期</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @{
+                                    xh = 0;
+                                    dec1 = 0.00m;
+                                    dec2 = 0.00m;
+                                    dec3 = 0.00m;
+                                    
+                                    for (i = 0; i < Model.记录集.Count; i++)
+                                    {
+                                        if ((Model.记录集[i].类型 != "0") && (Model.记录集[i].收支 == "收入"))
+                                        {
+                                            xh++;
+                                            dec1 = dec1 + Model.记录集[i].预算收入;
+                                            dec2 = dec2 + Model.记录集[i].实际收入;
+                                            dec3 = dec3 + Model.记录集[i].销项税额;
+                                            <tr>
+                                                <td>@xh</td>
+                                                <td>@Model.记录集[i].预算编号</td>
+                                                <td>@Model.记录集[i].项目名称</td>
+                                                <td>@Model.记录集[i].付款方</td>
+                                                <td>@Model.记录集[i].项目状态</td>
+                                                <td>@Model.记录集[i].销售</td>
+                                                <td>@Model.记录集[i].预算收入</td>
+                                                <td>@Model.记录集[i].销项税额</td>
+                                                <td>@Model.记录集[i].提交日期</td>
+                                            </tr>
+                                        }
+                                    }
+
+                                            <tr>
+                                                <td></td>
+                                                <td>合计</td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td>@dec1</td>
+                                                <td>@dec3</td>
+                                                <td></td>
+                                            </tr>
+                                }
+
+                            </tbody>
+                        </table>
+
+                        <br>
+
+                        <table style="width:100%;height:60px;">
+                            <tr style="width:100%">
+                                <td></td>
+                                <td style="text-align: center; width:360px;">
+
+                                    <div class="input-group">
+                                        <span class="input-group-btn">
+                                            <button id="buttoexcel" class="btn btn-default" type="button" onclick="Export2Excel_rpt1b('收入');">共 @xh 条，导出</button>
+                                        </span>
+                                    </div>
+                                    
+                                </td>
+                                <td></td>
+                            </tr>
+                        </table>
+
+                    </li>
+
+
+
+                </div>
+            </td>
+        </tr>
+
+        <tr style="border-top:solid 1px #ede9e9;background-color:#f1eded;">
+            <td style="text-align: center; vertical-align: middle;height:40px;">
+                <p style="font-size:16px;">@ViewBag.gsm 支出明细表</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right; vertical-align: middle;height:40px;">
+                <button class="btn btn-sm" type="button" style="width:100px;" onclick="Export2Excel_rpt1b('支出');">导出</button>
+            </td>
+        </tr>
+        <tr>
+            <td style="height:100%;vertical-align:top;" colspan="8">
+                <div class="divbackground">
+                    <li class="list-group-item">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>预算编号</th>
+                                    <th>项目名称</th>
+                                    <th>付款方</th>
+                                    <th>项目状态</th>
+                                    <th>销售</th>
+                                    <th>预算支出</th>
+                                    <th>进项税额</th>
+                                    <th>提交日期</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @{
+                                    xh = 0;
+                                    dec1 = 0.00m;
+                                    dec2 = 0.00m;
+                                    dec3 = 0.00m;
+                                    
+                                    for (i = 0; i < Model.记录集.Count; i++)
+                                    {
+                                        if ((Model.记录集[i].类型 != "0") && (Model.记录集[i].收支 == "支出"))
+                                        {
+                                            xh++;
+                                            dec1 = dec1 + Model.记录集[i].预算支出;
+                                            dec2 = dec2 + Model.记录集[i].实际支出;
+                                            dec3 = dec3 + Model.记录集[i].进项税额;
+                                        <tr>
+                                            <td>@xh</td>
+                                            <td>@Model.记录集[i].预算编号</td>
+                                            <td>@Model.记录集[i].项目名称</td>
+                                            <td>@Model.记录集[i].付款方</td>
+                                            <td>@Model.记录集[i].项目状态</td>
+                                            <td>@Model.记录集[i].销售</td>
+                                            <td>@Model.记录集[i].预算支出</td>
+                                            <td>@Model.记录集[i].进项税额</td>
+                                            <td>@Model.记录集[i].提交日期</td>
+                                        </tr>
+                                         }
+                                    }
+
+                                            <tr>
+                                                <td></td>
+                                                <td>合计</td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td>@dec1</td>
+                                                <td>@dec3</td>
+                                                <td></td>
+                                            </tr>
+                                }
+
+                            </tbody>
+                        </table>
+
+                        <br>
+
+                        <table style="width:100%;height:60px;">
+                            <tr style="width:100%">
+                                <td></td>
+                                <td style="text-align: center; width:360px;">
+
+                                    <div class="input-group">
+                                        <span class="input-group-btn">
+                                            <button id="buttoexcel" class="btn btn-default" type="button" onclick="Export2Excel_rpt1b('支出');">共 @xh 条，导出</button>
+                                        </span>
+                                    </div>
+                                    
+                                </td>
+                                <td></td>
+                            </tr>
+                        </table>
+
+                    </li>
+
+
+
+                </div>
+            </td>
+        </tr>
+
+
+        <tr>
+            <td style="height:100%;vertical-align:top;" colspan="8">
+                
+            </td>
+        </tr>
+
+    </table>
+
+</body>
+</html>
+
+
+
+<script type="text/javascript">
+
+    function Export2Excel_rpt1b(shouzhi) {
+        var gsm = $("#wheresql_rpt1_gsm_b").val();
+        if (gsm == "" || undefined || null) {
+            gsm = "";
+        }
+        var rq1 = $("#wheresql_rpt1_rq1_b").val();
+        if (rq1 == "" || undefined || null) {
+            rq1 = "";
+        }
+        var rq2 = $("#wheresql_rpt1_rq2_b").val();
+        if (rq2 == "" || undefined || null) {
+            rq2 = "";
+        }
+
+        gsm = escape(gsm);
+        rq1 = escape(rq1);
+        rq2 = escape(rq2);
+        var s = "../Report/Export2Excel_rpt1b?shouzhi=" + shouzhi + "&gsm=" + gsm + "&rq1=" + rq1 + "&rq2=" + rq2;
+        window.location = s;
+    }
+
+</script>
+
+
+
